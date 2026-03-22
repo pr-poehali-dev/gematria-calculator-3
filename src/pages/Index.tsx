@@ -203,7 +203,7 @@ export default function Index() {
   const [enabledCiphers, setEnabledCiphers] = useState<Set<CipherId>>(loadEnabledCiphers);
   const [history, setHistory] = useState<HistoryItem[]>(loadHistory);
   const [showBreakdownFor, setShowBreakdownFor] = useState<CipherId | null>(null);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const resultKey = useRef(0);
 
   // Persist ciphers
@@ -269,35 +269,33 @@ export default function Index() {
   const enabledCount = enabledCiphers.size;
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col text-[13px]">
       {/* Header */}
-      <header className="border-b border-border/60 px-8 py-5 flex items-center justify-between">
-        <div className="flex items-baseline gap-4">
-          <span className="font-display text-2xl font-light tracking-widest text-foreground/80" style={{ fontFamily: "'Cormorant', serif" }}>
+      <header className="border-b border-border px-4 py-2 flex items-center justify-between" style={{ background: 'hsl(222 25% 6%)' }}>
+        <div className="flex items-center gap-3">
+          <span className="text-foreground font-medium tracking-[0.2em] uppercase text-sm">
             ГЕМАТРИЯ
           </span>
-          <span className="text-xs text-muted-foreground font-body tracking-wide uppercase hidden sm:block">
-            числовой анализ
+          <span className="text-muted-foreground/40 text-xs hidden sm:block">
+            / calculator
           </span>
         </div>
 
         {/* Tabs */}
-        <nav className="flex gap-0 border border-border">
-          {([["calc", "Калькулятор"], ["ciphers", "Шифры"]] as [Tab, string][]).map(([t, label]) => (
+        <nav className="flex gap-0">
+          {([["calc", "CALC"], ["ciphers", "CIPHERS"]] as [Tab, string][]).map(([t, label]) => (
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`px-5 py-2 text-xs font-body tracking-widest uppercase transition-colors duration-150 relative ${
+              className={`px-4 py-1.5 text-xs tracking-widest transition-colors duration-100 border-b-2 ${
                 tab === t
-                  ? "bg-foreground text-background"
-                  : "text-muted-foreground hover:text-foreground"
+                  ? "text-accent border-accent"
+                  : "text-muted-foreground border-transparent hover:text-foreground"
               }`}
             >
               {label}
               {t === "ciphers" && (
-                <span className={`ml-2 text-[10px] ${tab === t ? "opacity-60" : "opacity-40"}`}>
-                  {enabledCount}
-                </span>
+                <span className="ml-1.5 text-[10px] opacity-50">{enabledCount}</span>
               )}
             </button>
           ))}
@@ -306,137 +304,86 @@ export default function Index() {
 
       {/* ── TAB: CALCULATOR ── */}
       {tab === "calc" && (
-        <main className="flex-1 flex flex-col lg:flex-row">
+        <main className="flex-1 flex flex-col lg:flex-row overflow-hidden">
           {/* Left — Input + Results */}
-          <section className="flex-1 flex flex-col px-8 py-10 max-w-2xl">
-
-            {/* Language badge */}
-            {detectedLang && (
-              <div className="mb-6 flex items-center gap-2 animate-fade-in-fast">
-                <span className="text-[10px] font-body tracking-widest uppercase text-muted-foreground/50">Язык:</span>
-                <span className="text-[10px] font-body text-accent border border-accent/40 px-1.5 py-0.5 leading-none">
-                  {detectedLang === "russian" ? "Русский" : "English"}
-                </span>
-                <span className="text-[10px] text-muted-foreground/40 font-body">
-                  · {activeCiphers.length} шифров активно
-                </span>
-              </div>
-            )}
-
-            {/* Input */}
-            <div className="relative">
-              <textarea
+          <section className="flex-1 flex flex-col min-w-0">
+            {/* Input bar */}
+            <div className="border-b border-border px-4 py-3 flex items-center gap-3" style={{ background: 'hsl(222 25% 8%)' }}>
+              <span className="text-muted-foreground/40 text-xs shrink-0">&gt;</span>
+              <input
                 ref={inputRef}
                 value={text}
                 onChange={(e) => setText(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    handleCalculate();
-                  }
-                }}
-                placeholder="Введите слово или фразу…"
-                rows={3}
-                className="w-full resize-none bg-transparent border-0 border-b-2 border-border focus:border-foreground outline-none transition-colors duration-200 text-3xl font-light text-foreground placeholder:text-muted-foreground/40 pb-4 pt-2 leading-snug"
-                style={{ fontFamily: "'Cormorant', serif" }}
+                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleCalculate(); } }}
+                placeholder="enter word or phrase..."
+                className="flex-1 bg-transparent outline-none text-foreground placeholder:text-muted-foreground/30 text-sm"
+                spellCheck={false}
+                autoComplete="off"
               />
-              {hasText && (
+              <div className="flex items-center gap-3 shrink-0">
+                {detectedLang && (
+                  <span className="text-[11px] text-accent/70 hidden sm:block">
+                    {detectedLang === "russian" ? "RU" : "EN"} · {activeCiphers.length}
+                  </span>
+                )}
+                {hasText && (
+                  <button onClick={() => { setText(""); setCommitted(""); }} className="text-muted-foreground/40 hover:text-muted-foreground transition-colors">
+                    <Icon name="X" size={13} />
+                  </button>
+                )}
                 <button
-                  onClick={() => { setText(""); setCommitted(""); }}
-                  className="absolute bottom-4 right-0 text-muted-foreground/50 hover:text-muted-foreground transition-colors"
+                  onClick={handleCalculate}
+                  disabled={!hasText || activeCiphers.length === 0}
+                  className="px-3 py-1 text-xs border border-border text-muted-foreground hover:text-accent hover:border-accent/50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors tracking-widest uppercase"
                 >
-                  <Icon name="X" size={14} />
+                  CALC
                 </button>
-              )}
-            </div>
-
-            <p className="mt-3 text-xs text-muted-foreground font-body tracking-wide">
-              Enter — вычислить · Shift+Enter — новая строка
-            </p>
-
-            <div className="flex items-center gap-4 mt-8">
-              <button
-                onClick={handleCalculate}
-                disabled={!hasText || activeCiphers.length === 0}
-                className="self-start px-8 py-3 bg-foreground text-background font-body text-sm tracking-widest uppercase disabled:opacity-30 disabled:cursor-not-allowed hover:bg-foreground/80 transition-colors duration-200"
-              >
-                Вычислить
-              </button>
-              {activeCiphers.length === 0 && (
-                <span className="text-xs text-muted-foreground/60 font-body">
-                  Выберите шифры во вкладке «Шифры»
-                </span>
-              )}
+              </div>
             </div>
 
             {/* Results table */}
-            {committed && committedResults.length > 0 && (
-              <div key={resultKey.current} className="mt-10 animate-fade-in">
-                <p className="text-xs text-muted-foreground font-body tracking-widest uppercase mb-4">
-                  Результаты для «{committed}»
-                </p>
+            <div className="flex-1 overflow-y-auto">
+              {committed && committedResults.length > 0 ? (
+                <div key={resultKey.current} className="animate-fade-in">
+                  {/* Table header */}
+                  <div className="flex items-center border-b border-border px-4 py-1.5 sticky top-0 z-10" style={{ background: 'hsl(222 25% 8%)' }}>
+                    <span className="text-muted-foreground/40 text-[11px] w-6 shrink-0">#</span>
+                    <span className="text-muted-foreground/40 text-[11px] flex-1">CIPHER</span>
+                    <span className="text-muted-foreground/40 text-[11px] w-16 text-right hidden sm:block">WORD</span>
+                    <span className="text-muted-foreground/40 text-[11px] w-12 text-right">ROOT</span>
+                    <span className="text-muted-foreground/40 text-[11px] w-16 text-right">VALUE</span>
+                    <span className="w-6 shrink-0" />
+                  </div>
 
-                <div className="flex flex-col gap-0">
                   {committedResults.map((r, i) => {
                     const cipher = CIPHERS.find((c) => c.id === r.cipherId)!;
                     const isOpen = showBreakdownFor === r.cipherId;
                     return (
-                      <div key={r.cipherId} className="border-b border-border/60 last:border-0">
+                      <div key={r.cipherId} className={`border-b border-border/40 ${isOpen ? "bg-secondary/60" : "hover:bg-secondary/40"} transition-colors`}>
                         <div
-                          className="flex items-center justify-between py-3 cursor-pointer hover:bg-secondary/50 px-2 -mx-2 transition-colors"
+                          className="flex items-center px-4 py-2 cursor-pointer"
                           onClick={() => setShowBreakdownFor(isOpen ? null : r.cipherId)}
                         >
-                          <div className="flex items-center gap-3 flex-1 min-w-0">
-                            <span
-                              className="text-[10px] font-body tracking-wider text-muted-foreground/40 w-5 text-right shrink-0"
-                            >
-                              {i + 1}
-                            </span>
-                            <span className="text-sm font-body text-foreground/80 truncate">
-                              {r.cipherLabel}
-                            </span>
-                            <span className="text-[10px] text-muted-foreground/40 font-body hidden sm:block">
-                              {cipher.sublabel}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-4 shrink-0">
-                            <span
-                              className="text-muted-foreground/40 text-xs font-body"
-                              title="Цифровой корень"
-                            >
-                              /{r.reduced}
-                            </span>
-                            <span
-                              className="font-display text-2xl font-light"
-                              style={{ fontFamily: "'Cormorant', serif", minWidth: "3rem", textAlign: "right" }}
-                            >
-                              {r.value}
-                            </span>
-                            <Icon
-                              name={isOpen ? "ChevronUp" : "ChevronDown"}
-                              size={12}
-                              className="text-muted-foreground/30"
-                            />
-                          </div>
+                          <span className="text-muted-foreground/30 text-[11px] w-6 shrink-0">{i + 1}</span>
+                          <span className="text-foreground/80 text-[13px] flex-1 truncate">{r.cipherLabel}</span>
+                          <span className="text-muted-foreground/30 text-[11px] w-16 text-right hidden sm:block truncate">{cipher.sublabel}</span>
+                          <span className="text-muted-foreground/40 text-[11px] w-12 text-right">{r.reduced}</span>
+                          <span className="text-accent text-sm font-medium w-16 text-right">{r.value}</span>
+                          <span className="w-6 flex justify-end shrink-0">
+                            <Icon name={isOpen ? "ChevronUp" : "ChevronDown"} size={11} className="text-muted-foreground/30" />
+                          </span>
                         </div>
 
                         {isOpen && (
-                          <div className="pb-3 px-2 animate-fade-in-fast">
+                          <div className="px-4 pb-3 pt-1 animate-fade-in-fast border-t border-border/30">
                             <div className="flex flex-wrap gap-1">
                               {parseChars(committed, cipher.table).map((c, ci) =>
                                 c.isSpace ? (
                                   <div key={ci} className="w-3" />
                                 ) : (
-                                  <div
-                                    key={ci}
-                                    className="char-cell flex flex-col items-center border border-border px-2 py-1.5 cursor-default"
-                                  >
-                                    <span className="text-base leading-none" style={{ fontFamily: "'Cormorant', serif" }}>
-                                      {c.char}
-                                    </span>
-                                    <span className="font-body text-[9px] text-muted-foreground mt-0.5">
-                                      {c.value || "—"}
-                                    </span>
+                                  <div key={ci} className="char-cell flex flex-col items-center border border-border/60 px-2 py-1 cursor-default min-w-[28px]">
+                                    <span className="text-foreground/80 text-[13px] leading-none">{c.char}</span>
+                                    <span className="text-accent/60 text-[9px] mt-0.5">{c.value || "·"}</span>
                                   </div>
                                 )
                               )}
@@ -447,71 +394,55 @@ export default function Index() {
                     );
                   })}
                 </div>
-              </div>
-            )}
+              ) : (
+                <div className="flex items-center justify-center h-40 text-muted-foreground/20 text-xs tracking-widest uppercase">
+                  {activeCiphers.length === 0 ? "— select ciphers —" : "— enter text & press CALC —"}
+                </div>
+              )}
+            </div>
           </section>
 
-          {/* Dividers */}
-          <div className="hidden lg:block w-px bg-border/60 my-8" />
-          <div className="lg:hidden h-px bg-border/60 mx-8" />
+          {/* Divider */}
+          <div className="hidden lg:block w-px bg-border" />
+          <div className="lg:hidden h-px bg-border" />
 
           {/* Right — History */}
-          <aside className="w-full lg:w-80 px-8 py-10 flex flex-col">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="font-body text-xs tracking-widest uppercase text-muted-foreground">
-                История
-              </h2>
+          <aside className="w-full lg:w-72 flex flex-col border-l-0">
+            <div className="flex items-center justify-between px-4 py-2 border-b border-border" style={{ background: 'hsl(222 25% 8%)' }}>
+              <span className="text-[11px] tracking-widest uppercase text-muted-foreground/50">HISTORY</span>
               {history.length > 0 && (
-                <button
-                  onClick={() => setHistory([])}
-                  className="text-xs text-muted-foreground/60 hover:text-muted-foreground font-body tracking-wide transition-colors flex items-center gap-1"
-                >
-                  <Icon name="Trash2" size={11} />
-                  Очистить
+                <button onClick={() => setHistory([])} className="text-[11px] text-muted-foreground/40 hover:text-muted-foreground transition-colors flex items-center gap-1">
+                  <Icon name="Trash2" size={10} /> CLR
                 </button>
               )}
             </div>
 
             {history.length === 0 ? (
-              <div className="flex-1 flex flex-col items-center justify-center text-center py-16">
-                <div className="text-5xl font-light text-border mb-4" style={{ fontFamily: "'Cormorant', serif" }}>
-                  א
-                </div>
-                <p className="text-xs text-muted-foreground/50 font-body tracking-wide">
-                  Здесь появятся ваши расчёты
-                </p>
+              <div className="flex-1 flex items-center justify-center text-muted-foreground/20 text-xs tracking-widest uppercase">
+                — empty —
               </div>
             ) : (
-              <div className="flex flex-col gap-0.5 overflow-y-auto max-h-[70vh] pr-1">
+              <div className="overflow-y-auto flex-1">
                 {history.map((item, idx) => (
                   <button
                     key={item.id}
                     onClick={() => { setText(item.text); setCommitted(item.text); resultKey.current += 1; }}
-                    className="animate-fade-in text-left px-4 py-3 hover:bg-secondary transition-colors border border-transparent hover:border-border"
-                    style={{ animationDelay: `${idx * 30}ms` }}
+                    className="animate-fade-in w-full text-left px-4 py-2.5 border-b border-border/40 hover:bg-secondary/50 transition-colors"
+                    style={{ animationDelay: `${idx * 20}ms` }}
                   >
-                    <div className="flex items-start justify-between gap-2">
-                      <span
-                        className="text-base font-light text-foreground truncate leading-snug flex-1"
-                        style={{ fontFamily: "'Cormorant', serif" }}
-                      >
-                        {item.text.length > 28 ? item.text.slice(0, 28) + "…" : item.text}
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-foreground/80 text-[13px] truncate flex-1">
+                        {item.text.length > 24 ? item.text.slice(0, 24) + "…" : item.text}
                       </span>
-                      <span className="text-[10px] text-muted-foreground/40 font-body shrink-0 mt-1">
-                        {item.results.length} шифров
-                      </span>
+                      <span className="text-muted-foreground/30 text-[10px] shrink-0">{item.results.length}c</span>
                     </div>
-                    <div className="flex flex-wrap gap-1 mt-1.5">
-                      {item.results.slice(0, 3).map((r) => (
-                        <span key={r.cipherId} className="text-[10px] font-body text-muted-foreground/60 border border-border/50 px-1.5 py-0.5">
-                          {r.cipherLabel.split(" ").slice(-1)[0]} {r.value}
-                        </span>
+                    <div className="flex gap-2 mt-1">
+                      {item.results.slice(0, 4).map((r) => (
+                        <span key={r.cipherId} className="text-accent/60 text-[11px]">{r.value}</span>
                       ))}
-                      {item.results.length > 3 && (
-                        <span className="text-[10px] font-body text-muted-foreground/40">+{item.results.length - 3}</span>
-                      )}
+                      {item.results.length > 4 && <span className="text-muted-foreground/30 text-[11px]">…</span>}
                     </div>
-                    <p className="text-[10px] text-muted-foreground/30 font-body mt-1">{item.date}</p>
+                    <p className="text-muted-foreground/25 text-[10px] mt-0.5">{item.date}</p>
                   </button>
                 ))}
               </div>
@@ -522,67 +453,59 @@ export default function Index() {
 
       {/* ── TAB: CIPHERS ── */}
       {tab === "ciphers" && (
-        <main className="flex-1 px-8 py-10 max-w-3xl">
-          <p className="text-sm text-muted-foreground font-body mb-8">
-            Выберите шифры, по которым будет вестись расчёт. Язык определяется автоматически — активны только шифры соответствующей группы.
-          </p>
+        <main className="flex-1 overflow-y-auto">
+          <div className="px-4 py-2 border-b border-border text-[11px] text-muted-foreground/40 tracking-wide" style={{ background: 'hsl(222 25% 8%)' }}>
+            Язык определяется автоматически · выбранные шифры сохраняются
+          </div>
 
           {(["english", "russian"] as const).map((group) => {
             const groupCiphers = CIPHERS.filter((c) => c.group === group);
             const allEnabled = groupCiphers.every((c) => enabledCiphers.has(c.id));
-            const someEnabled = groupCiphers.some((c) => enabledCiphers.has(c.id));
 
             return (
-              <div key={group} className="mb-10">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-body text-xs tracking-widest uppercase text-muted-foreground">
-                    {group === "english" ? "English" : "Russian"}
-                    <span className="ml-2 text-muted-foreground/40">
-                      ({groupCiphers.filter((c) => enabledCiphers.has(c.id)).length}/{groupCiphers.length})
+              <div key={group}>
+                {/* Group header */}
+                <div className="flex items-center justify-between px-4 py-2 border-b border-border sticky top-0 z-10" style={{ background: 'hsl(222 22% 10%)' }}>
+                  <div className="flex items-center gap-3">
+                    <span className="text-[11px] tracking-widest uppercase text-muted-foreground/60">
+                      {group === "english" ? "ENGLISH" : "RUSSIAN"}
                     </span>
-                  </h3>
+                    <span className="text-[11px] text-muted-foreground/30">
+                      {groupCiphers.filter((c) => enabledCiphers.has(c.id)).length}/{groupCiphers.length}
+                    </span>
+                  </div>
                   <button
                     onClick={() => toggleGroup(group, !allEnabled)}
-                    className="text-[10px] font-body tracking-wide text-muted-foreground/60 hover:text-foreground transition-colors uppercase"
+                    className="text-[11px] text-muted-foreground/40 hover:text-accent transition-colors tracking-widest uppercase"
                   >
-                    {allEnabled ? "Снять все" : "Выбрать все"}
+                    {allEnabled ? "NONE" : "ALL"}
                   </button>
                 </div>
 
-                <div className="flex flex-col gap-0 border border-border">
-                  {groupCiphers.map((c, i) => {
-                    const enabled = enabledCiphers.has(c.id);
-                    return (
-                      <label
-                        key={c.id}
-                        className={`flex items-center justify-between px-5 py-3.5 cursor-pointer transition-colors border-b border-border/60 last:border-0 ${
-                          enabled ? "bg-secondary/40" : "hover:bg-secondary/20"
-                        }`}
-                      >
-                        <div className="flex items-center gap-4">
-                          <div className={`w-4 h-4 border flex items-center justify-center shrink-0 transition-colors ${
-                            enabled ? "bg-foreground border-foreground" : "border-border"
-                          }`}>
-                            {enabled && <Icon name="Check" size={10} className="text-background" />}
-                          </div>
-                          <div>
-                            <p className="text-sm font-body text-foreground leading-none mb-0.5">{c.label}</p>
-                            <p className="text-[10px] font-body text-muted-foreground/50">{c.sublabel}</p>
-                          </div>
-                        </div>
-                        <input
-                          type="checkbox"
-                          checked={enabled}
-                          onChange={() => toggleCipher(c.id)}
-                          className="sr-only"
-                        />
-                        <span className="text-[10px] font-body text-muted-foreground/30 hidden sm:block">
-                          #{i + 1}
-                        </span>
-                      </label>
-                    );
-                  })}
-                </div>
+                {/* Cipher rows */}
+                {groupCiphers.map((c, i) => {
+                  const enabled = enabledCiphers.has(c.id);
+                  return (
+                    <label
+                      key={c.id}
+                      className={`flex items-center gap-4 px-4 py-2.5 cursor-pointer border-b border-border/30 transition-colors ${
+                        enabled ? "bg-secondary/30" : "hover:bg-secondary/20"
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={enabled}
+                        onChange={() => toggleCipher(c.id)}
+                        className="cipher-check"
+                      />
+                      <span className={`text-[13px] flex-1 transition-colors ${enabled ? "text-foreground" : "text-muted-foreground/50"}`}>
+                        {c.label}
+                      </span>
+                      <span className="text-[11px] text-muted-foreground/25 hidden sm:block">{c.sublabel}</span>
+                      <span className="text-[11px] text-muted-foreground/20 w-5 text-right">{i + 1}</span>
+                    </label>
+                  );
+                })}
               </div>
             );
           })}
@@ -590,10 +513,13 @@ export default function Index() {
       )}
 
       {/* Footer */}
-      <footer className="border-t border-border/60 px-8 py-4">
-        <p className="text-xs text-muted-foreground/40 font-body tracking-wide">
-          {enabledCount} шифров выбрано · язык определяется автоматически
-        </p>
+      <footer className="border-t border-border px-4 py-1.5 flex items-center justify-between" style={{ background: 'hsl(222 25% 6%)' }}>
+        <span className="text-[11px] text-muted-foreground/25 tracking-wide">
+          {enabledCount} ciphers selected
+        </span>
+        <span className="text-[11px] text-muted-foreground/20">
+          {new Date().getFullYear()}
+        </span>
       </footer>
     </div>
   );

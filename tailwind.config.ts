@@ -92,8 +92,7 @@ export default {
 				'accordion-up': 'accordion-up 0.2s ease-out'
 			},
 		fontFamily: {
-			display: ['Cormorant', 'serif'],
-			body: ['IBM Plex Sans', 'sans-serif'],
+			mono: ['Roboto Mono', 'monospace'],
 		},
 		}
 	},
