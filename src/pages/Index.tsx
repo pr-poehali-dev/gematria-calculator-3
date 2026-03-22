@@ -346,11 +346,22 @@ export default function Index() {
   }
 
   // Mouse drag handlers
+  function lockScroll() {
+    document.body.style.overflow = "hidden";
+    if (historyListRef.current) historyListRef.current.style.overflow = "hidden";
+  }
+
+  function unlockScroll() {
+    document.body.style.overflow = "";
+    if (historyListRef.current) historyListRef.current.style.overflow = "";
+  }
+
   function handleMouseDown(e: React.MouseEvent, id: number) {
     if (e.button !== 0) return;
     dragStartY.current = e.clientY;
     longPressTimer.current = setTimeout(() => {
       setDraggingId(id);
+      lockScroll();
     }, 400);
   }
 
@@ -361,6 +372,7 @@ export default function Index() {
     }
     setDraggingId(null);
     setDragOverIdx(null);
+    unlockScroll();
   }
 
   function handleMouseMove(e: React.MouseEvent) {
@@ -374,16 +386,17 @@ export default function Index() {
     dragStartY.current = e.touches[0].clientY;
     longPressTimer.current = setTimeout(() => {
       setDraggingId(id);
+      lockScroll();
     }, 400);
   }
 
   function handleTouchMoveDrag(e: React.TouchEvent) {
     if (!longPressTimer.current && draggingId === null) return;
     if (draggingId !== null) {
+      e.preventDefault();
       const idx = getIdxFromY(e.touches[0].clientY);
       if (idx !== null) setDragOverIdx(idx);
     } else {
-      // cancel long press if moved
       const dy = Math.abs(e.touches[0].clientY - dragStartY.current);
       if (dy > 10 && longPressTimer.current) {
         clearTimeout(longPressTimer.current);
@@ -399,6 +412,7 @@ export default function Index() {
     }
     setDraggingId(null);
     setDragOverIdx(null);
+    unlockScroll();
   }
 
   function toggleGroupCollapse(group: string) {
@@ -648,10 +662,10 @@ export default function Index() {
                             <span className="text-foreground/90 text-[13px] truncate flex-1">
                               {item.text.length > 26 ? item.text.slice(0, 26) + "…" : item.text}
                             </span>
-                            <div className="flex items-center gap-2 shrink-0 ml-2">
-                              <span className="text-muted-foreground/25 text-[10px]">{item.date}</span>
-                              <Icon name="GripVertical" size={11} className="text-muted-foreground/20 select-none" />
-                            </div>
+                            <span className="text-muted-foreground/25 text-[10px] shrink-0 ml-2">{item.date}</span>
+                          </div>
+                          <div className="flex justify-center mb-1.5">
+                            <Icon name="GripHorizontal" size={12} className="text-muted-foreground/20 select-none" />
                           </div>
                           <div className="border border-border/40 overflow-hidden">
                             <div className="flex border-b border-border/40" style={{ background: 'hsl(222 22% 10%)' }}>
