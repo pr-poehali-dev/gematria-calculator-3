@@ -670,6 +670,7 @@ export default function Index() {
                           <div
                             className="flex justify-center mb-1.5"
                             onTouchStart={(e) => { e.stopPropagation(); handleSwipeStart(e, item.id, true); handleTouchStartDrag(e, item.id); }}
+                            onContextMenu={(e) => e.preventDefault()}
                           >
                             <Icon name="GripHorizontal" size={12} className="text-muted-foreground/20 select-none" />
                           </div>
