@@ -83,6 +83,8 @@ const HE_ORDINAL: Record<string, number> = {
   'א':1,'ב':2,'ג':3,'ד':4,'ה':5,'ו':6,'ז':7,'ח':8,'ט':9,
   'י':10,'כ':11,'ל':12,'מ':13,'נ':14,'ס':15,'ע':16,'פ':17,'צ':18,
   'ק':19,'ר':20,'ש':21,'ת':22,
+  // final forms = same ordinal position as regular
+  'ך':11,'ם':13,'ן':14,'ף':17,'ץ':18,
 };
 const HE_REDUCTION: Record<string, number> = Object.fromEntries(
   Object.entries(HE_ORDINAL).map(([k, v]) => [k, ((v - 1) % 9) + 1])
@@ -92,6 +94,8 @@ const HE_GEMATRIA: Record<string, number> = {
   'א':1,'ב':2,'ג':3,'ד':4,'ה':5,'ו':6,'ז':7,'ח':8,'ט':9,
   'י':10,'כ':20,'ל':30,'מ':40,'נ':50,'ס':60,'ע':70,'פ':80,'צ':90,
   'ק':100,'ר':200,'ש':300,'ת':400,
+  // final forms = same value as regular
+  'ך':20,'ם':40,'ן':50,'ף':80,'ץ':90,
 };
 // Soffits (final forms): includes 5 final letters with extended values
 const HE_SOFFITS: Record<string, number> = {
