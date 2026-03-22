@@ -652,7 +652,7 @@ export default function Index() {
                         className={`transition-transform duration-200 ${isSwiped ? "-translate-x-24" : "translate-x-0"}`}
                         onTouchStart={(e) => handleSwipeStart(e, item.id)}
                         onTouchEnd={(e) => handleSwipeEnd(e, item.id)}
-                        onContextMenu={(e) => { e.preventDefault(); setSwipedId(item.id); setConfirmDeleteId(null); }}
+                        onContextMenu={(e) => e.preventDefault()}
                       >
                         <button
                           className="w-full text-left px-4 py-3 hover:bg-secondary/50 transition-colors"
