@@ -127,15 +127,15 @@ const GR_ISOPSEPHY: Record<string, number> = {
 // ── Arabic cipher tables ───────────────────────────────────────────────────────
 // Abjad (حساب الجُمَّل): classical Arabic letter values
 const AR_ABJAD: Record<string, number> = {
-  'ا':1,'ب':2,'ج':3,'د':4,'ه':5,'و':6,'ز':7,'ح':8,'ط':9,
-  'ي':10,'ك':20,'ل':30,'م':40,'ن':50,'س':60,'ع':70,'ف':80,'ص':90,
+  'ا':1,'أ':1,'إ':1,'آ':1,'ء':1,'ب':2,'ج':3,'د':4,'ه':5,'ة':5,'و':6,'ز':7,'ح':8,'ط':9,
+  'ي':10,'ى':10,'ك':20,'ل':30,'م':40,'ن':50,'س':60,'ع':70,'ف':80,'ص':90,
   'ق':100,'ر':200,'ش':300,'ت':400,'ث':500,'خ':600,'ذ':700,'ض':800,'ظ':900,'غ':1000,
 };
 // Arabic Ordinal: positional order of the alphabet (أ=1 … غ=28)
 const AR_ORDINAL: Record<string, number> = {
-  'ا':1,'ب':2,'ت':3,'ث':4,'ج':5,'ح':6,'خ':7,'د':8,'ذ':9,'ر':10,
+  'ا':1,'أ':1,'إ':1,'آ':1,'ء':1,'ب':2,'ت':3,'ة':3,'ث':4,'ج':5,'ح':6,'خ':7,'د':8,'ذ':9,'ر':10,
   'ز':11,'س':12,'ش':13,'ص':14,'ض':15,'ط':16,'ظ':17,'ع':18,'غ':19,
-  'ف':20,'ق':21,'ك':22,'ل':23,'م':24,'ن':25,'ه':26,'و':27,'ي':28,
+  'ف':20,'ق':21,'ك':22,'ل':23,'م':24,'ن':25,'ه':26,'و':27,'ي':28,'ى':28,
 };
 
 // ── Language detection ─────────────────────────────────────────────────────────
@@ -224,16 +224,21 @@ interface HistoryItem {
   date: string;
 }
 
+// Strip invisible diacritics: Hebrew niqqud (U+05B0–U+05C7), Arabic harakat (U+064B–U+065F), tatweel (U+0640)
+function stripDiacritics(char: string): string {
+  return char.replace(/[\u05B0-\u05C7\u064B-\u065F\u0640]/g, "");
+}
+
 function getCharValue(char: string, table: Record<string, number>): number {
   return table[char.toLowerCase()] ?? 0;
 }
 
 function parseChars(text: string, table: Record<string, number>): CharInfo[] {
-  return text.split("").map((char) => ({
-    char,
-    value: getCharValue(char, table),
-    isSpace: char === " ",
-  }));
+  return text.split("").flatMap((char) => {
+    const stripped = stripDiacritics(char);
+    if (stripped === "") return []; // diacritic-only char, skip
+    return [{ char: stripped, value: getCharValue(stripped, table), isSpace: stripped === " " }];
+  });
 }
 
 function sumText(text: string, table: Record<string, number>): number {
