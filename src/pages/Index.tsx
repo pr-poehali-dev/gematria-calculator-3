@@ -273,6 +273,13 @@ export default function Index() {
   const swipeStartX = useRef<number>(0);
   const swipeStartY = useRef<number>(0);
 
+  // Drag state
+  const [draggingId, setDraggingId] = useState<number | null>(null);
+  const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dragStartY = useRef<number>(0);
+  const historyListRef = useRef<HTMLDivElement>(null);
+
   function deleteHistoryItem(id: number) {
     setHistory((prev) => prev.filter((h) => h.id !== id));
     setSwipedId(null);
@@ -293,6 +300,83 @@ export default function Index() {
     } else if (dx < -20) {
       setSwipedId(null);
     }
+  }
+
+  function getIdxFromY(clientY: number): number | null {
+    if (!historyListRef.current) return null;
+    const children = Array.from(historyListRef.current.children) as HTMLElement[];
+    for (let i = 0; i < children.length; i++) {
+      const rect = children[i].getBoundingClientRect();
+      if (clientY < rect.bottom) return i;
+    }
+    return children.length - 1;
+  }
+
+  function applyDrop(fromId: number, toIdx: number) {
+    setHistory((prev) => {
+      const fromIdx = prev.findIndex((h) => h.id === fromId);
+      if (fromIdx === -1 || fromIdx === toIdx) return prev;
+      const next = [...prev];
+      const [item] = next.splice(fromIdx, 1);
+      next.splice(toIdx, 0, item);
+      return next;
+    });
+  }
+
+  // Mouse drag handlers
+  function handleMouseDown(e: React.MouseEvent, id: number) {
+    if (e.button !== 0) return;
+    dragStartY.current = e.clientY;
+    longPressTimer.current = setTimeout(() => {
+      setDraggingId(id);
+    }, 400);
+  }
+
+  function handleMouseUp(e: React.MouseEvent) {
+    if (longPressTimer.current) clearTimeout(longPressTimer.current);
+    if (draggingId !== null && dragOverIdx !== null) {
+      applyDrop(draggingId, dragOverIdx);
+    }
+    setDraggingId(null);
+    setDragOverIdx(null);
+  }
+
+  function handleMouseMove(e: React.MouseEvent) {
+    if (draggingId === null) return;
+    const idx = getIdxFromY(e.clientY);
+    if (idx !== null) setDragOverIdx(idx);
+  }
+
+  // Touch drag handlers
+  function handleTouchStartDrag(e: React.TouchEvent, id: number) {
+    dragStartY.current = e.touches[0].clientY;
+    longPressTimer.current = setTimeout(() => {
+      setDraggingId(id);
+    }, 400);
+  }
+
+  function handleTouchMoveDrag(e: React.TouchEvent) {
+    if (!longPressTimer.current && draggingId === null) return;
+    if (draggingId !== null) {
+      const idx = getIdxFromY(e.touches[0].clientY);
+      if (idx !== null) setDragOverIdx(idx);
+    } else {
+      // cancel long press if moved
+      const dy = Math.abs(e.touches[0].clientY - dragStartY.current);
+      if (dy > 10 && longPressTimer.current) {
+        clearTimeout(longPressTimer.current);
+        longPressTimer.current = null;
+      }
+    }
+  }
+
+  function handleTouchEndDrag(e: React.TouchEvent) {
+    if (longPressTimer.current) { clearTimeout(longPressTimer.current); longPressTimer.current = null; }
+    if (draggingId !== null && dragOverIdx !== null) {
+      applyDrop(draggingId, dragOverIdx);
+    }
+    setDraggingId(null);
+    setDragOverIdx(null);
   }
 
   function toggleGroupCollapse(group: string) {
@@ -458,7 +542,11 @@ export default function Index() {
               </div>
             ) : (
               <div
+                ref={historyListRef}
                 className="overflow-y-auto flex-1"
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
                 onClick={(e) => {
                   if (swipedId !== null) { e.stopPropagation(); setSwipedId(null); }
                   if (confirmDeleteId !== null) setConfirmDeleteId(null);
@@ -467,11 +555,17 @@ export default function Index() {
                 {history.map((item, idx) => {
                   const isSwiped = swipedId === item.id;
                   const isConfirming = confirmDeleteId === item.id;
+                  const isDragging = draggingId === item.id;
+                  const isDragOver = dragOverIdx === idx && draggingId !== null && draggingId !== item.id;
                   return (
                     <div
                       key={item.id}
-                      className="animate-fade-in relative border-b border-border/40 overflow-hidden"
-                      style={{ animationDelay: `${idx * 20}ms` }}
+                      className={`animate-fade-in relative border-b border-border/40 overflow-hidden transition-colors ${isDragging ? "opacity-40" : ""} ${isDragOver ? "border-t-2 border-t-accent" : ""}`}
+                      style={{ animationDelay: `${idx * 20}ms`, cursor: isDragging ? "grabbing" : "default" }}
+                      onMouseDown={(e) => handleMouseDown(e, item.id)}
+                      onTouchStart={(e) => handleTouchStartDrag(e, item.id)}
+                      onTouchMove={handleTouchMoveDrag}
+                      onTouchEnd={handleTouchEndDrag}
                     >
                       {/* Delete reveal — swipe: instant delete / desktop: YES/NO */}
                       <div
@@ -521,7 +615,10 @@ export default function Index() {
                             <span className="text-foreground/90 text-[13px] truncate flex-1">
                               {item.text.length > 26 ? item.text.slice(0, 26) + "…" : item.text}
                             </span>
-                            <span className="text-muted-foreground/25 text-[10px] shrink-0 ml-2">{item.date}</span>
+                            <div className="flex items-center gap-2 shrink-0 ml-2">
+                              <span className="text-muted-foreground/25 text-[10px]">{item.date}</span>
+                              <Icon name="GripVertical" size={11} className="text-muted-foreground/20 select-none" />
+                            </div>
                           </div>
                           <div className="border border-border/40 overflow-hidden">
                             <div className="flex border-b border-border/40" style={{ background: 'hsl(222 22% 10%)' }}>
