@@ -267,6 +267,15 @@ export default function Index() {
   const firstCipher = committedResults[0] ? CIPHERS.find((c) => c.id === committedResults[0].cipherId) : null;
 
   const enabledCount = enabledCiphers.size;
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
+
+  function toggleGroupCollapse(group: string) {
+    setCollapsedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(group)) { next.delete(group); } else { next.add(group); }
+      return next;
+    });
+  }
 
   return (
     <div className="min-h-screen bg-background flex flex-col text-[13px]">
@@ -461,19 +470,28 @@ export default function Index() {
           {(["english", "russian"] as const).map((group) => {
             const groupCiphers = CIPHERS.filter((c) => c.group === group);
             const allEnabled = groupCiphers.every((c) => enabledCiphers.has(c.id));
+            const isCollapsed = collapsedGroups.has(group);
 
             return (
               <div key={group}>
                 {/* Group header */}
                 <div className="flex items-center justify-between px-4 py-2 border-b border-border sticky top-0 z-10" style={{ background: 'hsl(222 22% 10%)' }}>
-                  <div className="flex items-center gap-3">
+                  <button
+                    className="flex items-center gap-3 flex-1 text-left"
+                    onClick={() => toggleGroupCollapse(group)}
+                  >
+                    <Icon
+                      name={isCollapsed ? "ChevronRight" : "ChevronDown"}
+                      size={11}
+                      className="text-muted-foreground/40"
+                    />
                     <span className="text-[11px] tracking-widest uppercase text-muted-foreground/60">
                       {group === "english" ? "ENGLISH" : "RUSSIAN"}
                     </span>
                     <span className="text-[11px] text-muted-foreground/30">
                       {groupCiphers.filter((c) => enabledCiphers.has(c.id)).length}/{groupCiphers.length}
                     </span>
-                  </div>
+                  </button>
                   <button
                     onClick={() => toggleGroup(group, !allEnabled)}
                     className="text-[11px] text-muted-foreground/40 hover:text-accent transition-colors tracking-widest uppercase"
@@ -483,7 +501,7 @@ export default function Index() {
                 </div>
 
                 {/* Cipher rows */}
-                {groupCiphers.map((c, i) => {
+                {!isCollapsed && groupCiphers.map((c, i) => {
                   const enabled = enabledCiphers.has(c.id);
                   return (
                     <label
