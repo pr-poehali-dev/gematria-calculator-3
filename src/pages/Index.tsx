@@ -303,6 +303,20 @@ function getValueStyle(val: number): "box" | "underline" | null {
   return null;
 }
 
+// For 2–3 letter words: check if concatenation of letter values forms a highlighted number
+// e.g. values [3, 58] → "358" → in HIGHLIGHT_BOX
+function findConcatMatch(values: number[]): { number: number; style: "box" | "underline" } | null {
+  if (values.length < 2 || values.length > 3) return null;
+  const concat = Number(values.join(""));
+  const style = getValueStyle(concat);
+  if (style) return { number: concat, style };
+  // also try reversed
+  const concatRev = Number([...values].reverse().join(""));
+  const styleRev = getValueStyle(concatRev);
+  if (styleRev) return { number: concatRev, style: styleRev };
+  return null;
+}
+
 const DEFAULT_ENABLED: CipherId[] = [
   "en_ordinal", "en_reduction", "en_sumerian",
   "en_reverse_ordinal", "en_reverse_reduction", "en_reverse_sumerian",
@@ -644,6 +658,8 @@ export default function Index() {
                   {committedResults.map((r, i) => {
                     const cipher = CIPHERS.find((c) => c.id === r.cipherId)!;
                     const isOpen = showBreakdownFor === r.cipherId;
+                    const chars = parseChars(committed, cipher.table).filter(c => !c.isSpace);
+                    const concatMatch = findConcatMatch(chars.map(c => c.value));
                     return (
                       <div key={r.cipherId} className={`border-b border-border/40 ${isOpen ? "bg-secondary/60" : "hover:bg-secondary/40"} transition-colors`}>
                         <div
@@ -654,7 +670,16 @@ export default function Index() {
                           <span className="text-foreground/80 text-[13px] flex-1 truncate">{r.cipherLabel}</span>
                           <span className="text-muted-foreground/30 text-[11px] w-16 text-right hidden sm:block truncate">{cipher.sublabel}</span>
                           <span className="text-muted-foreground/40 text-[11px] w-12 text-right">{r.reduced}</span>
-                          <span className="w-16 flex justify-end">
+                          {concatMatch && (
+                            <span className="w-14 flex justify-end mr-1 shrink-0">
+                              {concatMatch.style === "box" ? (
+                                <span className="text-[11px] font-medium px-1 py-0.5 leading-none" style={{ background: '#facc15', color: '#000' }}>{concatMatch.number}</span>
+                              ) : (
+                                <span className="text-[11px] text-accent font-medium" style={{ borderBottom: '2px solid #facc15' }}>{concatMatch.number}</span>
+                              )}
+                            </span>
+                          )}
+                          <span className={concatMatch ? "w-14 flex justify-end" : "w-16 flex justify-end"}>
                             {(() => {
                               const hs = getValueStyle(r.value);
                               if (hs === "box") return (
