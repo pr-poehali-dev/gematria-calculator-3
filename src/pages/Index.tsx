@@ -105,6 +105,16 @@ const RU_REVERSE_REDUCTION: Record<string, number> = Object.fromEntries(
   Object.entries(RU_REVERSE_ORDINAL).map(([k, v]) => [k, ((v - 1) % 9) + 1])
 );
 
+// Russian Sumerian: А=6, Б=12 … Я=198 (×6)
+const RU_SUMERIAN: Record<string, number> = Object.fromEntries(
+  Object.entries(RU_ORDINAL).map(([k, v]) => [k, v * 6])
+);
+
+// Russian Reverse Sumerian: Я=6, Ю=12 … А=198
+const RU_REVERSE_SUMERIAN: Record<string, number> = Object.fromEntries(
+  Object.entries(RU_REVERSE_ORDINAL).map(([k, v]) => [k, v * 6])
+);
+
 type CipherId =
   | "en_ordinal" | "en_reduction"
   | "en_reverse_ordinal" | "en_reverse_reduction"
@@ -112,7 +122,8 @@ type CipherId =
   | "en_extended" | "en_reverse_extended"
   | "en_agrippa_key" | "en_agrippa_ordinal" | "en_agrippa_reduction"
   | "en_qaballa" | "en_illuminati_novice" | "en_illuminati_reverse"
-  | "ru_ordinal" | "ru_reduction" | "ru_reverse_ordinal" | "ru_reverse_reduction";
+  | "ru_ordinal" | "ru_reduction" | "ru_reverse_ordinal" | "ru_reverse_reduction"
+  | "ru_sumerian" | "ru_reverse_sumerian";
 
 interface Cipher {
   id: CipherId;
@@ -141,6 +152,8 @@ const CIPHERS: Cipher[] = [
   { id: "ru_reduction",         label: "Russian Reduction",   sublabel: "А–Я цикл 1–9",     table: RU_REDUCTION,         group: "russian" },
   { id: "ru_reverse_ordinal",   label: "Russian R Ordinal",   sublabel: "Я=1 … А=33",       table: RU_REVERSE_ORDINAL,   group: "russian" },
   { id: "ru_reverse_reduction", label: "Russian R Reduction", sublabel: "Я–А цикл 1–9",     table: RU_REVERSE_REDUCTION, group: "russian" },
+  { id: "ru_sumerian",          label: "Russian Sumerian",    sublabel: "А=6 … Я=198",       table: RU_SUMERIAN,          group: "russian" },
+  { id: "ru_reverse_sumerian",  label: "Russian R Sumerian",  sublabel: "Я=6 … А=198",       table: RU_REVERSE_SUMERIAN,  group: "russian" },
 ];
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
