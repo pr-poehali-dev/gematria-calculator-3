@@ -290,6 +290,7 @@ export default function Index() {
 
   const enabledCount = enabledCiphers.size;
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
+  const [expandedCipherTable, setExpandedCipherTable] = useState<CipherId | null>(null);
   const [swipedId, setSwipedId] = useState<number | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
   const swipeStartX = useRef<number>(0);
@@ -755,25 +756,59 @@ export default function Index() {
                 {/* Cipher rows */}
                 {!isCollapsed && groupCiphers.map((c, i) => {
                   const enabled = enabledCiphers.has(c.id);
+                  const tableOpen = expandedCipherTable === c.id;
+                  const tableEntries = Object.entries(c.table).filter(([k]) => k.length === 1);
+
                   return (
-                    <label
-                      key={c.id}
-                      className={`flex items-center gap-4 px-4 py-2.5 cursor-pointer border-b border-border/30 transition-colors ${
-                        enabled ? "bg-secondary/30" : "hover:bg-secondary/20"
-                      }`}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={enabled}
-                        onChange={() => toggleCipher(c.id)}
-                        className="cipher-check"
-                      />
-                      <span className={`text-[13px] flex-1 transition-colors ${enabled ? "text-foreground" : "text-muted-foreground/50"}`}>
-                        {c.label}
-                      </span>
-                      <span className="text-[11px] text-muted-foreground/25 hidden sm:block">{c.sublabel}</span>
-                      <span className="text-[11px] text-muted-foreground/20 w-5 text-right">{i + 1}</span>
-                    </label>
+                    <div key={c.id} className="border-b border-border/30">
+                      <label
+                        className={`flex items-center gap-4 px-4 py-2.5 cursor-pointer transition-colors ${
+                          enabled ? "bg-secondary/30" : "hover:bg-secondary/20"
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={enabled}
+                          onChange={() => toggleCipher(c.id)}
+                          className="cipher-check"
+                        />
+                        <button
+                          className={`text-[13px] flex-1 text-left transition-colors ${enabled ? "text-foreground" : "text-muted-foreground/50"}`}
+                          onClick={(e) => { e.preventDefault(); setExpandedCipherTable(tableOpen ? null : c.id); }}
+                        >
+                          {c.label}
+                        </button>
+                        <span className="text-[11px] text-muted-foreground/25 hidden sm:block">{c.sublabel}</span>
+                        <button
+                          onClick={(e) => { e.preventDefault(); setExpandedCipherTable(tableOpen ? null : c.id); }}
+                          className="text-muted-foreground/30 hover:text-muted-foreground transition-colors"
+                        >
+                          <Icon name={tableOpen ? "ChevronUp" : "ChevronDown"} size={11} />
+                        </button>
+                      </label>
+
+                      {/* Letter-value table */}
+                      {tableOpen && (
+                        <div className="px-4 pb-3 pt-1 animate-fade-in-fast" style={{ background: 'hsl(222 25% 6%)' }}>
+                          <div className="flex flex-wrap gap-0 border border-border/40 overflow-hidden">
+                            {tableEntries.map(([letter, value]) => (
+                              <div
+                                key={letter}
+                                className="flex flex-col items-center border-r border-b border-border/30 last:border-r-0"
+                                style={{ minWidth: '2.2rem' }}
+                              >
+                                <span className="text-[11px] text-muted-foreground/50 px-1.5 py-1 border-b border-border/30 w-full text-center uppercase">
+                                  {letter}
+                                </span>
+                                <span className="text-[11px] text-accent/70 px-1.5 py-1 w-full text-center">
+                                  {value}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   );
                 })}
               </div>
