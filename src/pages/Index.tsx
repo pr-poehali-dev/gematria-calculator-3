@@ -95,6 +95,16 @@ const RU_REDUCTION: Record<string, number> = Object.fromEntries(
   Object.entries(RU_ORDINAL).map(([k, v]) => [k, ((v - 1) % 9) + 1])
 );
 
+// Russian Reverse Ordinal: Я=1 … А=33
+const RU_REVERSE_ORDINAL: Record<string, number> = Object.fromEntries(
+  Object.entries(RU_ORDINAL).map(([k, v]) => [k, 34 - v])
+);
+
+// Russian Reverse Reduction: цикл 1–9 от Reverse Ordinal
+const RU_REVERSE_REDUCTION: Record<string, number> = Object.fromEntries(
+  Object.entries(RU_REVERSE_ORDINAL).map(([k, v]) => [k, ((v - 1) % 9) + 1])
+);
+
 type CipherId =
   | "en_ordinal" | "en_reduction"
   | "en_reverse_ordinal" | "en_reverse_reduction"
@@ -102,7 +112,7 @@ type CipherId =
   | "en_extended" | "en_reverse_extended"
   | "en_agrippa_key" | "en_agrippa_ordinal" | "en_agrippa_reduction"
   | "en_qaballa" | "en_illuminati_novice" | "en_illuminati_reverse"
-  | "ru_ordinal" | "ru_reduction";
+  | "ru_ordinal" | "ru_reduction" | "ru_reverse_ordinal" | "ru_reverse_reduction";
 
 interface Cipher {
   id: CipherId;
@@ -127,8 +137,10 @@ const CIPHERS: Cipher[] = [
   { id: "en_qaballa",            label: "English Qaballa",      sublabel: "EQ: a=21 … b=26",       table: EN_QABALLA,            group: "english" },
   { id: "en_illuminati_novice",  label: "Illuminati Novice",    sublabel: "A=1, B=3, C=6…",        table: EN_ILLUMINATI_NOVICE,  group: "english" },
   { id: "en_illuminati_reverse", label: "Illuminati Reverse",   sublabel: "Z=1, Y=3, X=6…",        table: EN_ILLUMINATI_REVERSE, group: "english" },
-  { id: "ru_ordinal",            label: "Russian Ordinal",      sublabel: "А=1 … Я=33",            table: RU_ORDINAL,            group: "russian" },
-  { id: "ru_reduction",          label: "Russian Reduction",    sublabel: "А–Я цикл 1–9",          table: RU_REDUCTION,          group: "russian" },
+  { id: "ru_ordinal",           label: "Russian Ordinal",     sublabel: "А=1 … Я=33",       table: RU_ORDINAL,           group: "russian" },
+  { id: "ru_reduction",         label: "Russian Reduction",   sublabel: "А–Я цикл 1–9",     table: RU_REDUCTION,         group: "russian" },
+  { id: "ru_reverse_ordinal",   label: "Russian R Ordinal",   sublabel: "Я=1 … А=33",       table: RU_REVERSE_ORDINAL,   group: "russian" },
+  { id: "ru_reverse_reduction", label: "Russian R Reduction", sublabel: "Я–А цикл 1–9",     table: RU_REVERSE_REDUCTION, group: "russian" },
 ];
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
