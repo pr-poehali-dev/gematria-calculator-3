@@ -169,6 +169,21 @@ function formatDate(): string {
   }).format(new Date());
 }
 
+// ── Highlight rules ────────────────────────────────────────────────────────────
+
+const HIGHLIGHT_BOX = new Set([
+  119, 911, 116, 611, 666, 999, 216, 612,
+  239, 932, 236, 632, 88, 313, 358, 853, 33, 69, 96,
+]);
+
+const HIGHLIGHT_UNDERLINE = new Set([33329, 923, 392, 293]);
+
+function getValueStyle(val: number): "box" | "underline" | null {
+  if (HIGHLIGHT_BOX.has(val)) return "box";
+  if (HIGHLIGHT_UNDERLINE.has(val)) return "underline";
+  return null;
+}
+
 const DEFAULT_ENABLED: CipherId[] = ["en_ordinal", "en_reduction", "ru_ordinal", "ru_reduction"];
 const LS_CIPHERS = "gematria_ciphers";
 const LS_HISTORY = "gematria_history";
@@ -487,7 +502,18 @@ export default function Index() {
                           <span className="text-foreground/80 text-[13px] flex-1 truncate">{r.cipherLabel}</span>
                           <span className="text-muted-foreground/30 text-[11px] w-16 text-right hidden sm:block truncate">{cipher.sublabel}</span>
                           <span className="text-muted-foreground/40 text-[11px] w-12 text-right">{r.reduced}</span>
-                          <span className="text-accent text-sm font-medium w-16 text-right">{r.value}</span>
+                          <span className="w-16 flex justify-end">
+                            {(() => {
+                              const hs = getValueStyle(r.value);
+                              if (hs === "box") return (
+                                <span className="text-sm font-medium px-1.5 py-0.5 leading-none" style={{ background: '#facc15', color: '#000' }}>{r.value}</span>
+                              );
+                              if (hs === "underline") return (
+                                <span className="text-accent text-sm font-medium" style={{ borderBottom: '2px solid #facc15' }}>{r.value}</span>
+                              );
+                              return <span className="text-accent text-sm font-medium">{r.value}</span>;
+                            })()}
+                          </span>
                           <span className="w-6 flex justify-end shrink-0">
                             <Icon name={isOpen ? "ChevronUp" : "ChevronDown"} size={11} className="text-muted-foreground/30" />
                           </span>
@@ -632,8 +658,17 @@ export default function Index() {
                             </div>
                             <div className="flex">
                               {item.results.map((r) => (
-                                <div key={r.cipherId} className="flex-1 min-w-0 px-1.5 py-1.5 text-center border-r border-border/30 last:border-0">
-                                  <span className="text-[12px] text-accent/80 leading-none block">{r.value}</span>
+                                <div key={r.cipherId} className="flex-1 min-w-0 px-1 py-1 text-center border-r border-border/30 last:border-0 flex items-center justify-center">
+                                  {(() => {
+                                    const hs = getValueStyle(r.value);
+                                    if (hs === "box") return (
+                                      <span className="text-[11px] font-medium leading-none px-0.5" style={{ background: '#facc15', color: '#000' }}>{r.value}</span>
+                                    );
+                                    if (hs === "underline") return (
+                                      <span className="text-[12px] text-accent/80 leading-none" style={{ borderBottom: '1.5px solid #facc15' }}>{r.value}</span>
+                                    );
+                                    return <span className="text-[12px] text-accent/80 leading-none">{r.value}</span>;
+                                  })()}
                                 </div>
                               ))}
                             </div>
