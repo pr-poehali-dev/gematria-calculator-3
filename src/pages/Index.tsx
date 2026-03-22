@@ -169,7 +169,28 @@ function formatDate(): string {
   }).format(new Date());
 }
 
-const DEFAULT_ENABLED: Set<CipherId> = new Set(["en_ordinal", "en_reduction", "ru_ordinal", "ru_reduction"]);
+const DEFAULT_ENABLED: CipherId[] = ["en_ordinal", "en_reduction", "ru_ordinal", "ru_reduction"];
+const LS_CIPHERS = "gematria_ciphers";
+const LS_HISTORY = "gematria_history";
+
+function loadEnabledCiphers(): Set<CipherId> {
+  try {
+    const raw = localStorage.getItem(LS_CIPHERS);
+    if (raw) {
+      const arr = JSON.parse(raw) as CipherId[];
+      if (Array.isArray(arr) && arr.length > 0) return new Set(arr);
+    }
+  } catch (e) { console.warn(e); }
+  return new Set(DEFAULT_ENABLED);
+}
+
+function loadHistory(): HistoryItem[] {
+  try {
+    const raw = localStorage.getItem(LS_HISTORY);
+    if (raw) return JSON.parse(raw) as HistoryItem[];
+  } catch (e) { console.warn(e); }
+  return [];
+}
 
 // ── Component ──────────────────────────────────────────────────────────────────
 
@@ -179,11 +200,21 @@ export default function Index() {
   const [tab, setTab] = useState<Tab>("calc");
   const [text, setText] = useState("");
   const [committed, setCommitted] = useState("");
-  const [enabledCiphers, setEnabledCiphers] = useState<Set<CipherId>>(new Set(DEFAULT_ENABLED));
-  const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [enabledCiphers, setEnabledCiphers] = useState<Set<CipherId>>(loadEnabledCiphers);
+  const [history, setHistory] = useState<HistoryItem[]>(loadHistory);
   const [showBreakdownFor, setShowBreakdownFor] = useState<CipherId | null>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const resultKey = useRef(0);
+
+  // Persist ciphers
+  useEffect(() => {
+    localStorage.setItem(LS_CIPHERS, JSON.stringify(Array.from(enabledCiphers)));
+  }, [enabledCiphers]);
+
+  // Persist history
+  useEffect(() => {
+    localStorage.setItem(LS_HISTORY, JSON.stringify(history));
+  }, [history]);
 
   useEffect(() => { if (tab === "calc") inputRef.current?.focus(); }, [tab]);
 
