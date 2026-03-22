@@ -156,6 +156,15 @@ const CIPHERS: Cipher[] = [
   { id: "ru_reverse_sumerian",  label: "Russian R Sumerian",  sublabel: "Я=6 … А=198",       table: RU_REVERSE_SUMERIAN,  group: "russian" },
 ];
 
+// ── Language detection ─────────────────────────────────────────────────────────
+
+function detectLang(text: string): "english" | "russian" | null {
+  const ru = (text.match(/[а-яёА-ЯЁ]/g) || []).length;
+  const en = (text.match(/[a-zA-Z]/g) || []).length;
+  if (ru === 0 && en === 0) return null;
+  return ru >= en ? "russian" : "english";
+}
+
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
 interface CharInfo { char: string; value: number; isSpace: boolean }
@@ -209,8 +218,32 @@ export default function Index() {
   const [showBreakdown, setShowBreakdown] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const resultKey = useRef(0);
+  const manualOverride = useRef(false);
 
   useEffect(() => { inputRef.current?.focus(); }, []);
+
+  const detectedLang = detectLang(text);
+  const activeCipher = CIPHERS.find((c) => c.id === cipherId)!;
+
+  // Auto-switch cipher group when language changes (unless user manually picked)
+  useEffect(() => {
+    if (manualOverride.current) return;
+    if (detectedLang === "russian" && activeCipher.group !== "russian") {
+      setCipherId("ru_ordinal");
+    } else if (detectedLang === "english" && activeCipher.group !== "english") {
+      setCipherId("en_ordinal");
+    }
+  }, [detectedLang]);
+
+  function handleTextChange(val: string) {
+    manualOverride.current = false;
+    setText(val);
+  }
+
+  function handleCipherSelect(id: CipherId) {
+    manualOverride.current = true;
+    setCipherId(id);
+  }
 
   const cipher = CIPHERS.find((c) => c.id === cipherId)!;
   const hasText = text.trim().length > 0;
@@ -267,29 +300,39 @@ export default function Index() {
 
           {/* Cipher selector */}
           <div className="flex flex-col gap-3 mb-8">
-            {(["english", "russian"] as const).map((group) => (
-              <div key={group}>
-                <p className="text-[10px] text-muted-foreground/50 font-body tracking-widest uppercase mb-2">
-                  {group === "english" ? "English" : "Russian"}
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {CIPHERS.filter((c) => c.group === group).map((c) => (
-                    <button
-                      key={c.id}
-                      onClick={() => setCipherId(c.id)}
-                      title={c.sublabel}
-                      className={`px-3 py-1.5 text-xs font-body tracking-wide border transition-colors duration-150 ${
-                        cipherId === c.id
-                          ? "bg-foreground text-background border-foreground"
-                          : "bg-transparent text-muted-foreground border-border hover:border-foreground/40 hover:text-foreground"
-                      }`}
-                    >
-                      {c.label}
-                    </button>
-                  ))}
+            {(["english", "russian"] as const).map((group) => {
+              const isActive = detectedLang === group || detectedLang === null;
+              return (
+                <div key={group} className={`transition-opacity duration-300 ${!isActive ? "opacity-30 pointer-events-none" : ""}`}>
+                  <div className="flex items-center gap-2 mb-2">
+                    <p className="text-[10px] text-muted-foreground/50 font-body tracking-widest uppercase">
+                      {group === "english" ? "English" : "Russian"}
+                    </p>
+                    {detectedLang === group && (
+                      <span className="text-[10px] font-body text-accent border border-accent/40 px-1.5 py-0.5 leading-none animate-fade-in-fast">
+                        определено
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {CIPHERS.filter((c) => c.group === group).map((c) => (
+                      <button
+                        key={c.id}
+                        onClick={() => handleCipherSelect(c.id)}
+                        title={c.sublabel}
+                        className={`px-3 py-1.5 text-xs font-body tracking-wide border transition-colors duration-150 ${
+                          cipherId === c.id
+                            ? "bg-foreground text-background border-foreground"
+                            : "bg-transparent text-muted-foreground border-border hover:border-foreground/40 hover:text-foreground"
+                        }`}
+                      >
+                        {c.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* Input */}
@@ -297,7 +340,7 @@ export default function Index() {
             <textarea
               ref={inputRef}
               value={text}
-              onChange={(e) => setText(e.target.value)}
+              onChange={(e) => handleTextChange(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
@@ -311,7 +354,7 @@ export default function Index() {
             />
             {hasText && (
               <button
-                onClick={() => { setText(""); setCommitted(""); }}
+                onClick={() => { setText(""); setCommitted(""); manualOverride.current = false; }}
                 className="absolute bottom-4 right-0 text-muted-foreground/50 hover:text-muted-foreground transition-colors"
               >
                 <Icon name="X" size={14} />
