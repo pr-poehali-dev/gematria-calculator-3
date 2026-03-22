@@ -282,8 +282,8 @@ export default function Index() {
       {/* Header */}
       <header className="border-b border-border px-4 py-2 flex items-center justify-between" style={{ background: 'hsl(222 25% 6%)' }}>
         <div className="flex items-center gap-3">
-          <span className="text-foreground font-medium tracking-[0.2em] uppercase text-sm">
-            ГЕМАТРИЯ
+          <span className="text-foreground font-bold tracking-[0.2em] uppercase text-sm">
+            GEMATRIA
           </span>
           <span className="text-muted-foreground/40 text-xs hidden sm:block">
             / calculator
