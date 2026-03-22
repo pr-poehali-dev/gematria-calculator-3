@@ -473,13 +473,13 @@ export default function Index() {
                       className="animate-fade-in relative border-b border-border/40 overflow-hidden"
                       style={{ animationDelay: `${idx * 20}ms` }}
                     >
-                      {/* Delete reveal (swipe or confirm) */}
+                      {/* Delete reveal — swipe: instant delete / desktop: YES/NO */}
                       <div
                         className={`absolute inset-y-0 right-0 flex items-center transition-all duration-200 ${isSwiped || isConfirming ? "w-24" : "w-0"}`}
                         style={{ background: 'hsl(0 60% 30%)' }}
                       >
                         {isConfirming ? (
-                          <div className="flex w-full">
+                          <div className="flex w-full h-full">
                             <button
                               className="flex-1 h-full text-[11px] text-white/80 hover:text-white tracking-widest uppercase px-2"
                               onClick={(e) => { e.stopPropagation(); deleteHistoryItem(item.id); }}
@@ -496,7 +496,7 @@ export default function Index() {
                         ) : (
                           <button
                             className="w-full h-full text-[11px] text-white/70 hover:text-white tracking-widest uppercase"
-                            onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(item.id); setSwipedId(null); }}
+                            onClick={(e) => { e.stopPropagation(); deleteHistoryItem(item.id); }}
                           >
                             DEL
                           </button>
