@@ -436,22 +436,37 @@ export default function Index() {
                   <button
                     key={item.id}
                     onClick={() => { setText(item.text); setCommitted(item.text); resultKey.current += 1; }}
-                    className="animate-fade-in w-full text-left px-4 py-2.5 border-b border-border/40 hover:bg-secondary/50 transition-colors"
+                    className="animate-fade-in w-full text-left px-4 py-3 border-b border-border/40 hover:bg-secondary/50 transition-colors"
                     style={{ animationDelay: `${idx * 20}ms` }}
                   >
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-foreground/80 text-[13px] truncate flex-1">
-                        {item.text.length > 24 ? item.text.slice(0, 24) + "…" : item.text}
+                    {/* Word */}
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-foreground/90 text-[13px] truncate flex-1">
+                        {item.text.length > 26 ? item.text.slice(0, 26) + "…" : item.text}
                       </span>
-                      <span className="text-muted-foreground/30 text-[10px] shrink-0">{item.results.length}c</span>
+                      <span className="text-muted-foreground/25 text-[10px] shrink-0 ml-2">{item.date}</span>
                     </div>
-                    <div className="flex gap-2 mt-1">
-                      {item.results.slice(0, 4).map((r) => (
-                        <span key={r.cipherId} className="text-accent/60 text-[11px]">{r.value}</span>
-                      ))}
-                      {item.results.length > 4 && <span className="text-muted-foreground/30 text-[11px]">…</span>}
+                    {/* Mini table */}
+                    <div className="border border-border/40 overflow-hidden">
+                      {/* Header row — cipher abbreviations */}
+                      <div className="flex border-b border-border/40" style={{ background: 'hsl(222 22% 10%)' }}>
+                        {item.results.map((r) => (
+                          <div key={r.cipherId} className="flex-1 min-w-0 px-1.5 py-1 text-center border-r border-border/30 last:border-0">
+                            <span className="text-[9px] text-muted-foreground/40 tracking-wider uppercase leading-none block truncate">
+                              {r.cipherLabel.replace(/[^A-ZА-ЯЁ]/g, "").slice(0, 3) || r.cipherLabel.slice(0, 3).toUpperCase()}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                      {/* Values row */}
+                      <div className="flex">
+                        {item.results.map((r) => (
+                          <div key={r.cipherId} className="flex-1 min-w-0 px-1.5 py-1.5 text-center border-r border-border/30 last:border-0">
+                            <span className="text-[12px] text-accent/80 leading-none block">{r.value}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                    <p className="text-muted-foreground/25 text-[10px] mt-0.5">{item.date}</p>
                   </button>
                 ))}
               </div>
