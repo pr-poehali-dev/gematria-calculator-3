@@ -80,6 +80,11 @@ const EN_ILLUMINATI_NOVICE: Record<string, number> = Object.fromEntries(
   Object.entries(EN_ORDINAL).map(([k, v]) => [k, (v * (v + 1)) / 2])
 );
 
+// Illuminati Reverse: треугольные числа от Reverse Ordinal (Z=1…A=26)
+const EN_ILLUMINATI_REVERSE: Record<string, number> = Object.fromEntries(
+  Object.entries(EN_REVERSE_ORDINAL).map(([k, v]) => [k, (v * (v + 1)) / 2])
+);
+
 const RU_ORDINAL: Record<string, number> = {
   а:1,б:2,в:3,г:4,д:5,е:6,ё:7,ж:8,з:9,и:10,й:11,к:12,л:13,м:14,
   н:15,о:16,п:17,р:18,с:19,т:20,у:21,ф:22,х:23,ц:24,ч:25,ш:26,щ:27,
@@ -96,7 +101,7 @@ type CipherId =
   | "en_sumerian" | "en_reverse_sumerian"
   | "en_extended" | "en_reverse_extended"
   | "en_agrippa_key" | "en_agrippa_ordinal" | "en_agrippa_reduction"
-  | "en_qaballa" | "en_illuminati_novice"
+  | "en_qaballa" | "en_illuminati_novice" | "en_illuminati_reverse"
   | "ru_ordinal" | "ru_reduction";
 
 interface Cipher {
@@ -121,6 +126,7 @@ const CIPHERS: Cipher[] = [
   { id: "en_agrippa_reduction",  label: "Agrippa Reduction",    sublabel: "Агриппа → цифр. корень",table: EN_AGRIPPA_REDUCTION,  group: "english" },
   { id: "en_qaballa",            label: "English Qaballa",      sublabel: "EQ: a=21 … b=26",       table: EN_QABALLA,            group: "english" },
   { id: "en_illuminati_novice",  label: "Illuminati Novice",    sublabel: "A=1, B=3, C=6…",        table: EN_ILLUMINATI_NOVICE,  group: "english" },
+  { id: "en_illuminati_reverse", label: "Illuminati Reverse",   sublabel: "Z=1, Y=3, X=6…",        table: EN_ILLUMINATI_REVERSE, group: "english" },
   { id: "ru_ordinal",            label: "Russian Ordinal",      sublabel: "А=1 … Я=33",            table: RU_ORDINAL,            group: "russian" },
   { id: "ru_reduction",          label: "Russian Reduction",    sublabel: "А–Я цикл 1–9",          table: RU_REDUCTION,          group: "russian" },
 ];
