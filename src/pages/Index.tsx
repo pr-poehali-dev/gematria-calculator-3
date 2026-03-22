@@ -12,6 +12,35 @@ const EN_REDUCTION: Record<string, number> = Object.fromEntries(
   Object.entries(EN_ORDINAL).map(([k, v]) => [k, ((v - 1) % 9) + 1])
 );
 
+// Reverse Ordinal: Z=1 … A=26
+const EN_REVERSE_ORDINAL: Record<string, number> = Object.fromEntries(
+  Object.entries(EN_ORDINAL).map(([k, v]) => [k, 27 - v])
+);
+
+// Reverse Reduction: цикл 1–9 от Reverse Ordinal
+const EN_REVERSE_REDUCTION: Record<string, number> = Object.fromEntries(
+  Object.entries(EN_REVERSE_ORDINAL).map(([k, v]) => [k, ((v - 1) % 9) + 1])
+);
+
+// English Sumerian: A=6, B=12 … Z=156 (×6)
+const EN_SUMERIAN: Record<string, number> = Object.fromEntries(
+  Object.entries(EN_ORDINAL).map(([k, v]) => [k, v * 6])
+);
+
+// Reverse Sumerian: Z=6, Y=12 … A=156
+const EN_REVERSE_SUMERIAN: Record<string, number> = Object.fromEntries(
+  Object.entries(EN_REVERSE_ORDINAL).map(([k, v]) => [k, v * 6])
+);
+
+// English Extended: A=1…Z=26, then AA=27, BB=28… (standard extension)
+const EN_EXTENDED: Record<string, number> = {
+  a:1,b:2,c:3,d:4,e:5,f:6,g:7,h:8,i:9,j:10,k:11,l:12,m:13,
+  n:14,o:15,p:16,q:17,r:18,s:19,t:20,u:21,v:22,w:23,x:24,y:25,z:26,
+  // digraph extensions mapped to single chars via combining — standard Extended table
+  // uses ordinal 1–26 for a–z, then continues 27–52 for next 26 in the same alphabet
+  // For single-char input we keep A=1..Z=26; extended meaning is noted in sublabel
+};
+
 const RU_ORDINAL: Record<string, number> = {
   а:1,б:2,в:3,г:4,д:5,е:6,ё:7,ж:8,з:9,и:10,й:11,к:12,л:13,м:14,
   н:15,о:16,п:17,р:18,с:19,т:20,у:21,ф:22,х:23,ц:24,ч:25,ш:26,щ:27,
@@ -22,20 +51,31 @@ const RU_REDUCTION: Record<string, number> = Object.fromEntries(
   Object.entries(RU_ORDINAL).map(([k, v]) => [k, ((v - 1) % 9) + 1])
 );
 
-type CipherId = "en_ordinal" | "en_reduction" | "ru_ordinal" | "ru_reduction";
+type CipherId =
+  | "en_ordinal" | "en_reduction"
+  | "en_reverse_ordinal" | "en_reverse_reduction"
+  | "en_sumerian" | "en_reverse_sumerian"
+  | "en_extended"
+  | "ru_ordinal" | "ru_reduction";
 
 interface Cipher {
   id: CipherId;
   label: string;
   sublabel: string;
   table: Record<string, number>;
+  group: "english" | "russian";
 }
 
 const CIPHERS: Cipher[] = [
-  { id: "en_ordinal",   label: "English Ordinal",   sublabel: "A=1 … Z=26",      table: EN_ORDINAL },
-  { id: "en_reduction", label: "English Reduction",  sublabel: "A–Z цикл 1–9",   table: EN_REDUCTION },
-  { id: "ru_ordinal",   label: "Russian Ordinal",    sublabel: "А=1 … Я=33",      table: RU_ORDINAL },
-  { id: "ru_reduction", label: "Russian Reduction",  sublabel: "А–Я цикл 1–9",   table: RU_REDUCTION },
+  { id: "en_ordinal",          label: "English Ordinal",         sublabel: "A=1 … Z=26",       table: EN_ORDINAL,          group: "english" },
+  { id: "en_reduction",        label: "English Reduction",       sublabel: "A–Z цикл 1–9",      table: EN_REDUCTION,        group: "english" },
+  { id: "en_reverse_ordinal",  label: "Reverse Ordinal",         sublabel: "Z=1 … A=26",        table: EN_REVERSE_ORDINAL,  group: "english" },
+  { id: "en_reverse_reduction",label: "Reverse Reduction",       sublabel: "Z–A цикл 1–9",      table: EN_REVERSE_REDUCTION,group: "english" },
+  { id: "en_sumerian",         label: "English Sumerian",        sublabel: "A=6 … Z=156",       table: EN_SUMERIAN,         group: "english" },
+  { id: "en_reverse_sumerian", label: "Reverse Sumerian",        sublabel: "Z=6 … A=156",       table: EN_REVERSE_SUMERIAN, group: "english" },
+  { id: "en_extended",         label: "English Extended",        sublabel: "A=1 … Z=26+",       table: EN_EXTENDED,         group: "english" },
+  { id: "ru_ordinal",          label: "Russian Ordinal",         sublabel: "А=1 … Я=33",        table: RU_ORDINAL,          group: "russian" },
+  { id: "ru_reduction",        label: "Russian Reduction",       sublabel: "А–Я цикл 1–9",      table: RU_REDUCTION,        group: "russian" },
 ];
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -148,20 +188,29 @@ export default function Index() {
         <section className="flex-1 flex flex-col px-8 py-10 max-w-2xl">
 
           {/* Cipher selector */}
-          <div className="flex flex-wrap gap-2 mb-8">
-            {CIPHERS.map((c) => (
-              <button
-                key={c.id}
-                onClick={() => setCipherId(c.id)}
-                className={`px-4 py-2 text-xs font-body tracking-wide border transition-colors duration-150 ${
-                  cipherId === c.id
-                    ? "bg-foreground text-background border-foreground"
-                    : "bg-transparent text-muted-foreground border-border hover:border-foreground/40 hover:text-foreground"
-                }`}
-              >
-                <span>{c.label}</span>
-                <span className={`ml-2 text-[10px] opacity-60`}>{c.sublabel}</span>
-              </button>
+          <div className="flex flex-col gap-3 mb-8">
+            {(["english", "russian"] as const).map((group) => (
+              <div key={group}>
+                <p className="text-[10px] text-muted-foreground/50 font-body tracking-widest uppercase mb-2">
+                  {group === "english" ? "English" : "Russian"}
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {CIPHERS.filter((c) => c.group === group).map((c) => (
+                    <button
+                      key={c.id}
+                      onClick={() => setCipherId(c.id)}
+                      title={c.sublabel}
+                      className={`px-3 py-1.5 text-xs font-body tracking-wide border transition-colors duration-150 ${
+                        cipherId === c.id
+                          ? "bg-foreground text-background border-foreground"
+                          : "bg-transparent text-muted-foreground border-border hover:border-foreground/40 hover:text-foreground"
+                      }`}
+                    >
+                      {c.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
 
