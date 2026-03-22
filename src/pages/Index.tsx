@@ -77,6 +77,24 @@ const RU_REVERSE_SUMERIAN: Record<string, number> = Object.fromEntries(
   Object.entries(RU_REVERSE_ORDINAL).map(([k, v]) => [k, v * 6])
 );
 
+// ── Church Slavonic cipher tables ─────────────────────────────────────────────
+// Церковнославянская гематрия: буквенная цифирь (титло), греческий образец
+// а=1…т=300, у=400…ѿ=900 (с архаическими буквами)
+const CS_GEMATRIA: Record<string, number> = {
+  'а':1,'в':2,'г':3,'д':4,'є':5,'ѕ':6,'з':7,'и':8,'ѳ':9,
+  'і':10,'к':20,'л':30,'м':40,'н':50,'ѯ':60,'о':70,'п':80,'ч':90,
+  'р':100,'с':200,'т':300,'у':400,'ф':500,'х':600,'ѱ':700,'ѡ':800,'ѿ':900,
+  // common alternate forms
+  'е':5,'ї':10,'ω':800,
+};
+// Порядковый (по месту в церковнославянской азбуке)
+const CS_ORDINAL: Record<string, number> = {
+  'а':1,'б':2,'в':3,'г':4,'д':5,'е':6,'є':6,'ж':7,'ѕ':8,'з':9,'и':10,
+  'і':11,'ї':11,'й':12,'к':13,'л':14,'м':15,'н':16,'о':17,'п':18,'р':19,
+  'с':20,'т':21,'у':22,'ф':23,'х':24,'ѡ':25,'ц':26,'ч':27,'ш':28,'щ':29,
+  'ъ':30,'ы':31,'ь':32,'ѣ':33,'э':34,'ю':35,'я':36,'ѳ':37,'ѵ':38,'ѯ':39,'ѱ':40,'ѿ':41,
+};
+
 // ── Hebrew cipher tables ───────────────────────────────────────────────────────
 // Standard Hebrew alphabet: 22 letters (Alef–Tav)
 const HE_ORDINAL: Record<string, number> = {
@@ -140,14 +158,17 @@ const AR_ORDINAL: Record<string, number> = {
 
 // ── Language detection ─────────────────────────────────────────────────────────
 
-function detectLang(text: string): "english" | "russian" | "hebrew" | "greek" | "arabic" | null {
+function detectLang(text: string): "english" | "russian" | "church_slavonic" | "hebrew" | "greek" | "arabic" | null {
   const ru = (text.match(/[а-яёА-ЯЁ]/g) || []).length;
   const en = (text.match(/[a-zA-Z]/g) || []).length;
   const he = (text.match(/[\u05D0-\u05EA\u05F0-\u05F4]/g) || []).length;
   const gr = (text.match(/[\u0370-\u03FF\u1F00-\u1FFF]/g) || []).length;
   const ar = (text.match(/[\u0600-\u06FF]/g) || []).length;
+  // Church Slavonic: archaic Cyrillic letters unique to OCS (ѕ ѯ ѱ ѡ ѿ ѳ ѵ ѣ ї і)
+  const cs = (text.match(/[ѕѯѱѡѿѳѵѣїі]/g) || []).length;
   const max = Math.max(ru, en, he, gr, ar);
-  if (max === 0) return null;
+  if (max === 0 && cs === 0) return null;
+  if (cs > 0) return "church_slavonic";
   if (max === he) return "hebrew";
   if (max === gr) return "greek";
   if (max === ar) return "arabic";
@@ -165,6 +186,7 @@ type CipherId =
   | "en_qaballa" | "en_illuminati_novice" | "en_illuminati_reverse"
   | "ru_ordinal" | "ru_reduction" | "ru_reverse_ordinal" | "ru_reverse_reduction"
   | "ru_sumerian" | "ru_reverse_sumerian"
+  | "cs_gematria" | "cs_ordinal"
   | "he_ordinal" | "he_reduction" | "he_gematria" | "he_soffits"
   | "gr_isopsephy" | "gr_ordinal" | "gr_reduction" | "gr_ordinal_24"
   | "ar_abjad" | "ar_ordinal";
@@ -174,7 +196,7 @@ interface Cipher {
   label: string;
   sublabel: string;
   table: Record<string, number>;
-  group: "english" | "russian" | "hebrew" | "greek" | "arabic";
+  group: "english" | "russian" | "church_slavonic" | "hebrew" | "greek" | "arabic";
 }
 
 const CIPHERS: Cipher[] = [
@@ -198,6 +220,9 @@ const CIPHERS: Cipher[] = [
   { id: "ru_reverse_reduction",  label: "Russian R Reduction", sublabel: "Я–А цикл 1–9",          table: RU_REVERSE_REDUCTION,  group: "russian" },
   { id: "ru_sumerian",           label: "Russian Sumerian",    sublabel: "А=6 … Я=198",           table: RU_SUMERIAN,           group: "russian" },
   { id: "ru_reverse_sumerian",   label: "Russian R Sumerian",  sublabel: "Я=6 … А=198",           table: RU_REVERSE_SUMERIAN,   group: "russian" },
+  // Church Slavonic
+  { id: "cs_gematria",           label: "ЦС Гематрия",         sublabel: "а=1 … ѿ=900",           table: CS_GEMATRIA,           group: "church_slavonic" },
+  { id: "cs_ordinal",            label: "ЦС Порядковый",       sublabel: "а=1 … ѿ=41",            table: CS_ORDINAL,            group: "church_slavonic" },
   // Hebrew
   { id: "he_gematria",           label: "Hebrew Gematria",     sublabel: "א=1 … ת=400",           table: HE_GEMATRIA,           group: "hebrew" },
   { id: "he_soffits",            label: "Hebrew Soffits",      sublabel: "incl. finals ך–ץ",       table: HE_SOFFITS,            group: "hebrew" },
@@ -285,6 +310,7 @@ const DEFAULT_ENABLED: CipherId[] = [
   "ru_ordinal", "ru_reduction",
   "ru_reverse_ordinal", "ru_reverse_reduction",
   "ru_sumerian", "ru_reverse_sumerian",
+  "cs_gematria",
   "he_gematria", "he_soffits",
   "gr_isopsephy", "gr_ordinal",
   "ar_abjad",
@@ -344,6 +370,7 @@ export default function Index() {
   const activeCiphers = CIPHERS.filter((c) => {
     if (!enabledCiphers.has(c.id)) return false;
     if (detectedLang === "russian") return c.group === "russian";
+    if (detectedLang === "church_slavonic") return c.group === "church_slavonic";
     if (detectedLang === "english") return c.group === "english";
     if (detectedLang === "hebrew") return c.group === "hebrew";
     if (detectedLang === "greek") return c.group === "greek";
@@ -582,7 +609,7 @@ export default function Index() {
               <div className="flex items-center gap-3 shrink-0">
                 {detectedLang && (
                   <span className="text-[11px] text-accent/70 hidden sm:block">
-                    {{ english: "EN", russian: "RU", hebrew: "HE", greek: "GR", arabic: "AR" }[detectedLang]} · {activeCiphers.length}
+                    {{ english: "EN", russian: "RU", church_slavonic: "ЦСЯ", hebrew: "HE", greek: "GR", arabic: "AR" }[detectedLang]} · {activeCiphers.length}
                   </span>
                 )}
                 {hasText && (
@@ -820,11 +847,11 @@ export default function Index() {
             Язык определяется автоматически · выбранные шифры сохраняются
           </div>
 
-          {(["english", "russian", "hebrew", "greek", "arabic"] as const).map((group) => {
+          {(["english", "russian", "church_slavonic", "hebrew", "greek", "arabic"] as const).map((group) => {
             const groupCiphers = CIPHERS.filter((c) => c.group === group);
             const allEnabled = groupCiphers.every((c) => enabledCiphers.has(c.id));
             const isCollapsed = collapsedGroups.has(group);
-            const groupLabel = { english: "ENGLISH", russian: "RUSSIAN", hebrew: "HEBREW", greek: "GREEK", arabic: "ARABIC" }[group];
+            const groupLabel = { english: "ENGLISH", russian: "RUSSIAN", church_slavonic: "ЦЕРК.-СЛАВ.", hebrew: "HEBREW", greek: "GREEK", arabic: "ARABIC" }[group];
 
             return (
               <div key={group}>
