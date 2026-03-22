@@ -108,8 +108,8 @@ interface Cipher {
 
 const CIPHERS: Cipher[] = [
   { id: "en_ordinal",            label: "English Ordinal",     sublabel: "A=1 … Z=26",           table: EN_ORDINAL,            group: "english" },
-  { id: "en_reduction",          label: "English Reduction",   sublabel: "A–Z цикл 1–9",          table: EN_REDUCTION,          group: "english" },
   { id: "en_reverse_ordinal",    label: "English R Ordinal",   sublabel: "Z=1 … A=26",            table: EN_REVERSE_ORDINAL,    group: "english" },
+  { id: "en_reduction",          label: "English Reduction",   sublabel: "A–Z цикл 1–9",          table: EN_REDUCTION,          group: "english" },
   { id: "en_reverse_reduction",  label: "English R Reduction", sublabel: "Z–A цикл 1–9",          table: EN_REVERSE_REDUCTION,  group: "english" },
   { id: "en_sumerian",           label: "English Sumerian",    sublabel: "A=6 … Z=156",           table: EN_SUMERIAN,           group: "english" },
   { id: "en_reverse_sumerian",   label: "English R Sumerian",  sublabel: "Z=6 … A=156",           table: EN_REVERSE_SUMERIAN,   group: "english" },
