@@ -32,14 +32,31 @@ const EN_REVERSE_SUMERIAN: Record<string, number> = Object.fromEntries(
   Object.entries(EN_REVERSE_ORDINAL).map(([k, v]) => [k, v * 6])
 );
 
-// English Extended: A=1…Z=26, then AA=27, BB=28… (standard extension)
+// English Extended: A=1…Z=26, same as Ordinal for base letters
 const EN_EXTENDED: Record<string, number> = {
   a:1,b:2,c:3,d:4,e:5,f:6,g:7,h:8,i:9,j:10,k:11,l:12,m:13,
   n:14,o:15,p:16,q:17,r:18,s:19,t:20,u:21,v:22,w:23,x:24,y:25,z:26,
-  // digraph extensions mapped to single chars via combining — standard Extended table
-  // uses ordinal 1–26 for a–z, then continues 27–52 for next 26 in the same alphabet
-  // For single-char input we keep A=1..Z=26; extended meaning is noted in sublabel
 };
+
+// Reverse Extended: Z=1 … A=26 (Reverse Ordinal values), same mapping
+const EN_REVERSE_EXTENDED: Record<string, number> = Object.fromEntries(
+  Object.entries(EN_ORDINAL).map(([k, v]) => [k, 27 - v])
+);
+
+// Agrippa Key (Latin Qabala): classical Cornelius Agrippa letter values
+// a=1,b=2,c=3,d=4,e=5,f=6,g=7,h=8,i=9,k=10,l=20,m=30,n=40,o=50,
+// p=60,q=70,r=80,s=90,t=100,u=200,x=300,y=400,z=500 (j=i, v=u, w=v+v)
+const EN_AGRIPPA_KEY: Record<string, number> = {
+  a:1,b:2,c:3,d:4,e:5,f:6,g:7,h:8,i:9,j:9,
+  k:10,l:20,m:30,n:40,o:50,p:60,q:70,r:80,s:90,
+  t:100,u:200,v:200,w:400,x:300,y:400,z:500,
+};
+
+// Agrippa Ordinal: Agrippa Key values reduced to ordinal position (1-based rank among unique values)
+const AGRIPPA_RANKS = [1,2,3,4,5,6,7,8,9,10,20,30,40,50,60,70,80,90,100,200,300,400,500];
+const EN_AGRIPPA_ORDINAL: Record<string, number> = Object.fromEntries(
+  Object.entries(EN_AGRIPPA_KEY).map(([k, v]) => [k, AGRIPPA_RANKS.indexOf(v) + 1])
+);
 
 const RU_ORDINAL: Record<string, number> = {
   а:1,б:2,в:3,г:4,д:5,е:6,ё:7,ж:8,з:9,и:10,й:11,к:12,л:13,м:14,
@@ -55,7 +72,8 @@ type CipherId =
   | "en_ordinal" | "en_reduction"
   | "en_reverse_ordinal" | "en_reverse_reduction"
   | "en_sumerian" | "en_reverse_sumerian"
-  | "en_extended"
+  | "en_extended" | "en_reverse_extended"
+  | "en_agrippa_key" | "en_agrippa_ordinal"
   | "ru_ordinal" | "ru_reduction";
 
 interface Cipher {
@@ -67,15 +85,18 @@ interface Cipher {
 }
 
 const CIPHERS: Cipher[] = [
-  { id: "en_ordinal",          label: "English Ordinal",         sublabel: "A=1 … Z=26",       table: EN_ORDINAL,          group: "english" },
-  { id: "en_reduction",        label: "English Reduction",       sublabel: "A–Z цикл 1–9",      table: EN_REDUCTION,        group: "english" },
-  { id: "en_reverse_ordinal",  label: "Reverse Ordinal",         sublabel: "Z=1 … A=26",        table: EN_REVERSE_ORDINAL,  group: "english" },
-  { id: "en_reverse_reduction",label: "Reverse Reduction",       sublabel: "Z–A цикл 1–9",      table: EN_REVERSE_REDUCTION,group: "english" },
-  { id: "en_sumerian",         label: "English Sumerian",        sublabel: "A=6 … Z=156",       table: EN_SUMERIAN,         group: "english" },
-  { id: "en_reverse_sumerian", label: "Reverse Sumerian",        sublabel: "Z=6 … A=156",       table: EN_REVERSE_SUMERIAN, group: "english" },
-  { id: "en_extended",         label: "English Extended",        sublabel: "A=1 … Z=26+",       table: EN_EXTENDED,         group: "english" },
-  { id: "ru_ordinal",          label: "Russian Ordinal",         sublabel: "А=1 … Я=33",        table: RU_ORDINAL,          group: "russian" },
-  { id: "ru_reduction",        label: "Russian Reduction",       sublabel: "А–Я цикл 1–9",      table: RU_REDUCTION,        group: "russian" },
+  { id: "en_ordinal",           label: "English Ordinal",     sublabel: "A=1 … Z=26",          table: EN_ORDINAL,           group: "english" },
+  { id: "en_reduction",         label: "English Reduction",   sublabel: "A–Z цикл 1–9",         table: EN_REDUCTION,         group: "english" },
+  { id: "en_reverse_ordinal",   label: "Reverse Ordinal",     sublabel: "Z=1 … A=26",           table: EN_REVERSE_ORDINAL,   group: "english" },
+  { id: "en_reverse_reduction", label: "Reverse Reduction",   sublabel: "Z–A цикл 1–9",         table: EN_REVERSE_REDUCTION, group: "english" },
+  { id: "en_sumerian",          label: "English Sumerian",    sublabel: "A=6 … Z=156",          table: EN_SUMERIAN,          group: "english" },
+  { id: "en_reverse_sumerian",  label: "Reverse Sumerian",    sublabel: "Z=6 … A=156",          table: EN_REVERSE_SUMERIAN,  group: "english" },
+  { id: "en_extended",          label: "English Extended",    sublabel: "A=1 … Z=26",           table: EN_EXTENDED,          group: "english" },
+  { id: "en_reverse_extended",  label: "Reverse Extended",    sublabel: "Z=1 … A=26",           table: EN_REVERSE_EXTENDED,  group: "english" },
+  { id: "en_agrippa_key",       label: "Agrippa Key",         sublabel: "a=1 … z=500",          table: EN_AGRIPPA_KEY,       group: "english" },
+  { id: "en_agrippa_ordinal",   label: "Agrippa Ordinal",     sublabel: "ранг по Агриппе 1–23", table: EN_AGRIPPA_ORDINAL,   group: "english" },
+  { id: "ru_ordinal",           label: "Russian Ordinal",     sublabel: "А=1 … Я=33",           table: RU_ORDINAL,           group: "russian" },
+  { id: "ru_reduction",         label: "Russian Reduction",   sublabel: "А–Я цикл 1–9",         table: RU_REDUCTION,         group: "russian" },
 ];
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
