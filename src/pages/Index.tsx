@@ -106,10 +106,10 @@ const HE_SOFFITS: Record<string, number> = {
 };
 
 // ── Greek cipher tables ────────────────────────────────────────────────────────
-// Classical 24-letter Greek alphabet (α–ω)
+// Classical 24-letter Greek alphabet (α–ω) + final sigma ς = same as σ
 const GR_ORDINAL: Record<string, number> = {
   'α':1,'β':2,'γ':3,'δ':4,'ε':5,'ζ':6,'η':7,'θ':8,'ι':9,
-  'κ':10,'λ':11,'μ':12,'ν':13,'ξ':14,'ο':15,'π':16,'ρ':17,'σ':18,
+  'κ':10,'λ':11,'μ':12,'ν':13,'ξ':14,'ο':15,'π':16,'ρ':17,'σ':18,'ς':18,
   'τ':19,'υ':20,'φ':21,'χ':22,'ψ':23,'ω':24,
 };
 const GR_REDUCTION: Record<string, number> = Object.fromEntries(
@@ -117,11 +117,11 @@ const GR_REDUCTION: Record<string, number> = Object.fromEntries(
 );
 // Greek Ordinal 24 — same as GR_ORDINAL (alias for clarity in UI)
 const GR_ORDINAL_24: Record<string, number> = { ...GR_ORDINAL };
-// Isopsephy: traditional Greek numerical values (matching gematria structure)
+// Isopsephy: classical Greek milesian numerals (α=1…ω=800, with archaic ϛ=6, ϙ=90, ϡ=900)
 const GR_ISOPSEPHY: Record<string, number> = {
-  'α':1,'β':2,'γ':3,'δ':4,'ε':5,'ζ':7,'η':8,'θ':9,
-  'ι':10,'κ':20,'λ':30,'μ':40,'ν':50,'ξ':60,'ο':70,'π':80,'ρ':100,
-  'σ':200,'τ':300,'υ':400,'φ':500,'χ':600,'ψ':700,'ω':800,
+  'α':1,'β':2,'γ':3,'δ':4,'ε':5,'ϛ':6,'ζ':7,'η':8,'θ':9,
+  'ι':10,'κ':20,'λ':30,'μ':40,'ν':50,'ξ':60,'ο':70,'π':80,'ϙ':90,'ρ':100,
+  'σ':200,'ς':200,'τ':300,'υ':400,'φ':500,'χ':600,'ψ':700,'ω':800,'ϡ':900,
 };
 
 // ── Arabic cipher tables ───────────────────────────────────────────────────────
@@ -224,9 +224,14 @@ interface HistoryItem {
   date: string;
 }
 
-// Strip invisible diacritics: Hebrew niqqud (U+05B0–U+05C7), Arabic harakat (U+064B–U+065F), tatweel (U+0640)
+// Strip diacritics:
+// - Greek: NFD-decompose then remove combining marks (U+0300–U+036F, U+1DC0–U+1DFF)
+// - Hebrew niqqud (U+05B0–U+05C7)
+// - Arabic harakat (U+064B–U+065F), tatweel (U+0640)
 function stripDiacritics(char: string): string {
-  return char.replace(/[\u05B0-\u05C7\u064B-\u065F\u0640]/g, "");
+  return char
+    .normalize("NFD")
+    .replace(/[\u0300-\u036F\u1DC0-\u1DFF\u05B0-\u05C7\u064B-\u065F\u0640]/g, "");
 }
 
 function getCharValue(char: string, table: Record<string, number>): number {
