@@ -184,7 +184,14 @@ function getValueStyle(val: number): "box" | "underline" | null {
   return null;
 }
 
-const DEFAULT_ENABLED: CipherId[] = ["en_ordinal", "en_reduction", "ru_ordinal", "ru_reduction"];
+const DEFAULT_ENABLED: CipherId[] = [
+  "en_ordinal", "en_reduction", "en_sumerian",
+  "en_reverse_ordinal", "en_reverse_reduction", "en_reverse_sumerian",
+  "en_agrippa_key",
+  "ru_ordinal", "ru_reduction",
+  "ru_reverse_ordinal", "ru_reverse_reduction",
+  "ru_sumerian", "ru_reverse_sumerian",
+];
 const LS_CIPHERS = "gematria_ciphers";
 const LS_HISTORY = "gematria_history";
 
