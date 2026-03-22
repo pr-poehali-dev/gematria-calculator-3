@@ -294,6 +294,7 @@ export default function Index() {
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
   const swipeStartX = useRef<number>(0);
   const swipeStartY = useRef<number>(0);
+  const swipeDisabled = useRef<boolean>(false);
 
   // Drag state
   const [draggingId, setDraggingId] = useState<number | null>(null);
@@ -308,12 +309,14 @@ export default function Index() {
     setConfirmDeleteId(null);
   }
 
-  function handleSwipeStart(e: React.TouchEvent, id: number) {
+  function handleSwipeStart(e: React.TouchEvent, id: number, fromGrip = false) {
+    swipeDisabled.current = fromGrip;
     swipeStartX.current = e.touches[0].clientX;
     swipeStartY.current = e.touches[0].clientY;
   }
 
   function handleSwipeEnd(e: React.TouchEvent, id: number) {
+    if (swipeDisabled.current) return;
     const dx = swipeStartX.current - e.changedTouches[0].clientX;
     const dy = Math.abs(swipeStartY.current - e.changedTouches[0].clientY);
     if (dx > 60 && dy < 40) {
@@ -664,7 +667,10 @@ export default function Index() {
                             </span>
                             <span className="text-muted-foreground/25 text-[10px] shrink-0 ml-2">{item.date}</span>
                           </div>
-                          <div className="flex justify-center mb-1.5">
+                          <div
+                            className="flex justify-center mb-1.5"
+                            onTouchStart={(e) => { e.stopPropagation(); handleSwipeStart(e, item.id, true); handleTouchStartDrag(e, item.id); }}
+                          >
                             <Icon name="GripHorizontal" size={12} className="text-muted-foreground/20 select-none" />
                           </div>
                           <div className="border border-border/40 overflow-hidden">
