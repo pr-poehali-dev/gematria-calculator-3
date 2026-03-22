@@ -77,12 +77,76 @@ const RU_REVERSE_SUMERIAN: Record<string, number> = Object.fromEntries(
   Object.entries(RU_REVERSE_ORDINAL).map(([k, v]) => [k, v * 6])
 );
 
+// ── Hebrew cipher tables ───────────────────────────────────────────────────────
+// Standard Hebrew alphabet: 22 letters (Alef–Tav)
+const HE_ORDINAL: Record<string, number> = {
+  'א':1,'ב':2,'ג':3,'ד':4,'ה':5,'ו':6,'ז':7,'ח':8,'ט':9,
+  'י':10,'כ':11,'ל':12,'מ':13,'נ':14,'ס':15,'ע':16,'פ':17,'צ':18,
+  'ק':19,'ר':20,'ש':21,'ת':22,
+};
+const HE_REDUCTION: Record<string, number> = Object.fromEntries(
+  Object.entries(HE_ORDINAL).map(([k, v]) => [k, ((v - 1) % 9) + 1])
+);
+// Standard gematria (Mispar Hechrachi): traditional Hebrew numerical values
+const HE_GEMATRIA: Record<string, number> = {
+  'א':1,'ב':2,'ג':3,'ד':4,'ה':5,'ו':6,'ז':7,'ח':8,'ט':9,
+  'י':10,'כ':20,'ל':30,'מ':40,'נ':50,'ס':60,'ע':70,'פ':80,'צ':90,
+  'ק':100,'ר':200,'ש':300,'ת':400,
+};
+// Soffits (final forms): includes 5 final letters with extended values
+const HE_SOFFITS: Record<string, number> = {
+  'א':1,'ב':2,'ג':3,'ד':4,'ה':5,'ו':6,'ז':7,'ח':8,'ט':9,
+  'י':10,'כ':20,'ל':30,'מ':40,'נ':50,'ס':60,'ע':70,'פ':80,'צ':90,
+  'ק':100,'ר':200,'ש':300,'ת':400,
+  'ך':500,'ם':600,'ן':700,'ף':800,'ץ':900,
+};
+
+// ── Greek cipher tables ────────────────────────────────────────────────────────
+// Classical 24-letter Greek alphabet (α–ω)
+const GR_ORDINAL: Record<string, number> = {
+  'α':1,'β':2,'γ':3,'δ':4,'ε':5,'ζ':6,'η':7,'θ':8,'ι':9,
+  'κ':10,'λ':11,'μ':12,'ν':13,'ξ':14,'ο':15,'π':16,'ρ':17,'σ':18,
+  'τ':19,'υ':20,'φ':21,'χ':22,'ψ':23,'ω':24,
+};
+const GR_REDUCTION: Record<string, number> = Object.fromEntries(
+  Object.entries(GR_ORDINAL).map(([k, v]) => [k, ((v - 1) % 9) + 1])
+);
+// Greek Ordinal 24 — same as GR_ORDINAL (alias for clarity in UI)
+const GR_ORDINAL_24: Record<string, number> = { ...GR_ORDINAL };
+// Isopsephy: traditional Greek numerical values (matching gematria structure)
+const GR_ISOPSEPHY: Record<string, number> = {
+  'α':1,'β':2,'γ':3,'δ':4,'ε':5,'ζ':7,'η':8,'θ':9,
+  'ι':10,'κ':20,'λ':30,'μ':40,'ν':50,'ξ':60,'ο':70,'π':80,'ρ':100,
+  'σ':200,'τ':300,'υ':400,'φ':500,'χ':600,'ψ':700,'ω':800,
+};
+
+// ── Arabic cipher tables ───────────────────────────────────────────────────────
+// Abjad (حساب الجُمَّل): classical Arabic letter values
+const AR_ABJAD: Record<string, number> = {
+  'ا':1,'ب':2,'ج':3,'د':4,'ه':5,'و':6,'ز':7,'ح':8,'ط':9,
+  'ي':10,'ك':20,'ل':30,'م':40,'ن':50,'س':60,'ع':70,'ف':80,'ص':90,
+  'ق':100,'ر':200,'ش':300,'ت':400,'ث':500,'خ':600,'ذ':700,'ض':800,'ظ':900,'غ':1000,
+};
+// Arabic Ordinal: positional order of the alphabet (أ=1 … غ=28)
+const AR_ORDINAL: Record<string, number> = {
+  'ا':1,'ب':2,'ت':3,'ث':4,'ج':5,'ح':6,'خ':7,'د':8,'ذ':9,'ر':10,
+  'ز':11,'س':12,'ش':13,'ص':14,'ض':15,'ط':16,'ظ':17,'ع':18,'غ':19,
+  'ف':20,'ق':21,'ك':22,'ل':23,'م':24,'ن':25,'ه':26,'و':27,'ي':28,
+};
+
 // ── Language detection ─────────────────────────────────────────────────────────
 
-function detectLang(text: string): "english" | "russian" | null {
+function detectLang(text: string): "english" | "russian" | "hebrew" | "greek" | "arabic" | null {
   const ru = (text.match(/[а-яёА-ЯЁ]/g) || []).length;
   const en = (text.match(/[a-zA-Z]/g) || []).length;
-  if (ru === 0 && en === 0) return null;
+  const he = (text.match(/[\u05D0-\u05EA\u05F0-\u05F4]/g) || []).length;
+  const gr = (text.match(/[\u0370-\u03FF\u1F00-\u1FFF]/g) || []).length;
+  const ar = (text.match(/[\u0600-\u06FF]/g) || []).length;
+  const max = Math.max(ru, en, he, gr, ar);
+  if (max === 0) return null;
+  if (max === he) return "hebrew";
+  if (max === gr) return "greek";
+  if (max === ar) return "arabic";
   return ru >= en ? "russian" : "english";
 }
 
@@ -96,14 +160,17 @@ type CipherId =
   | "en_agrippa_key" | "en_agrippa_ordinal" | "en_agrippa_reduction"
   | "en_qaballa" | "en_illuminati_novice" | "en_illuminati_reverse"
   | "ru_ordinal" | "ru_reduction" | "ru_reverse_ordinal" | "ru_reverse_reduction"
-  | "ru_sumerian" | "ru_reverse_sumerian";
+  | "ru_sumerian" | "ru_reverse_sumerian"
+  | "he_ordinal" | "he_reduction" | "he_gematria" | "he_soffits"
+  | "gr_isopsephy" | "gr_ordinal" | "gr_reduction" | "gr_ordinal_24"
+  | "ar_abjad" | "ar_ordinal";
 
 interface Cipher {
   id: CipherId;
   label: string;
   sublabel: string;
   table: Record<string, number>;
-  group: "english" | "russian";
+  group: "english" | "russian" | "hebrew" | "greek" | "arabic";
 }
 
 const CIPHERS: Cipher[] = [
@@ -127,6 +194,19 @@ const CIPHERS: Cipher[] = [
   { id: "ru_reverse_reduction",  label: "Russian R Reduction", sublabel: "Я–А цикл 1–9",          table: RU_REVERSE_REDUCTION,  group: "russian" },
   { id: "ru_sumerian",           label: "Russian Sumerian",    sublabel: "А=6 … Я=198",           table: RU_SUMERIAN,           group: "russian" },
   { id: "ru_reverse_sumerian",   label: "Russian R Sumerian",  sublabel: "Я=6 … А=198",           table: RU_REVERSE_SUMERIAN,   group: "russian" },
+  // Hebrew
+  { id: "he_gematria",           label: "Hebrew Gematria",     sublabel: "א=1 … ת=400",           table: HE_GEMATRIA,           group: "hebrew" },
+  { id: "he_soffits",            label: "Hebrew Soffits",      sublabel: "incl. finals ך–ץ",       table: HE_SOFFITS,            group: "hebrew" },
+  { id: "he_ordinal",            label: "Hebrew Ordinal",      sublabel: "א=1 … ת=22",            table: HE_ORDINAL,            group: "hebrew" },
+  { id: "he_reduction",          label: "Hebrew Reduction",    sublabel: "цикл 1–9",              table: HE_REDUCTION,          group: "hebrew" },
+  // Greek
+  { id: "gr_isopsephy",          label: "Greek Isopsephy",     sublabel: "α=1 … ω=800",           table: GR_ISOPSEPHY,          group: "greek" },
+  { id: "gr_ordinal",            label: "Greek Ordinal",       sublabel: "α=1 … ω=24",            table: GR_ORDINAL,            group: "greek" },
+  { id: "gr_ordinal_24",         label: "Greek Ordinal 24",    sublabel: "α=1 … ω=24",            table: GR_ORDINAL_24,         group: "greek" },
+  { id: "gr_reduction",          label: "Greek Reduction",     sublabel: "цикл 1–9",              table: GR_REDUCTION,          group: "greek" },
+  // Arabic
+  { id: "ar_abjad",              label: "Arabic Abjad",        sublabel: "ا=1 … غ=1000",          table: AR_ABJAD,              group: "arabic" },
+  { id: "ar_ordinal",            label: "Arabic Ordinal",      sublabel: "ا=1 … ي=28",            table: AR_ORDINAL,            group: "arabic" },
 ];
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -191,6 +271,9 @@ const DEFAULT_ENABLED: CipherId[] = [
   "ru_ordinal", "ru_reduction",
   "ru_reverse_ordinal", "ru_reverse_reduction",
   "ru_sumerian", "ru_reverse_sumerian",
+  "he_gematria", "he_soffits",
+  "gr_isopsephy", "gr_ordinal",
+  "ar_abjad",
 ];
 const LS_CIPHERS = "gematria_ciphers";
 const LS_HISTORY = "gematria_history";
@@ -248,6 +331,9 @@ export default function Index() {
     if (!enabledCiphers.has(c.id)) return false;
     if (detectedLang === "russian") return c.group === "russian";
     if (detectedLang === "english") return c.group === "english";
+    if (detectedLang === "hebrew") return c.group === "hebrew";
+    if (detectedLang === "greek") return c.group === "greek";
+    if (detectedLang === "arabic") return c.group === "arabic";
     return true;
   });
 
@@ -275,7 +361,7 @@ export default function Index() {
     });
   }
 
-  function toggleGroup(group: "english" | "russian", enable: boolean) {
+  function toggleGroup(group: "english" | "russian" | "hebrew" | "greek" | "arabic", enable: boolean) {
     setEnabledCiphers((prev) => {
       const next = new Set(prev);
       CIPHERS.filter((c) => c.group === group).forEach((c) => {
@@ -482,7 +568,7 @@ export default function Index() {
               <div className="flex items-center gap-3 shrink-0">
                 {detectedLang && (
                   <span className="text-[11px] text-accent/70 hidden sm:block">
-                    {detectedLang === "russian" ? "RU" : "EN"} · {activeCiphers.length}
+                    {{ english: "EN", russian: "RU", hebrew: "HE", greek: "GR", arabic: "AR" }[detectedLang]} · {activeCiphers.length}
                   </span>
                 )}
                 {hasText && (
@@ -720,10 +806,11 @@ export default function Index() {
             Язык определяется автоматически · выбранные шифры сохраняются
           </div>
 
-          {(["english", "russian"] as const).map((group) => {
+          {(["english", "russian", "hebrew", "greek", "arabic"] as const).map((group) => {
             const groupCiphers = CIPHERS.filter((c) => c.group === group);
             const allEnabled = groupCiphers.every((c) => enabledCiphers.has(c.id));
             const isCollapsed = collapsedGroups.has(group);
+            const groupLabel = { english: "ENGLISH", russian: "RUSSIAN", hebrew: "HEBREW", greek: "GREEK", arabic: "ARABIC" }[group];
 
             return (
               <div key={group}>
@@ -739,7 +826,7 @@ export default function Index() {
                       className="text-muted-foreground/40"
                     />
                     <span className="text-[11px] tracking-widest uppercase text-muted-foreground/60">
-                      {group === "english" ? "ENGLISH" : "RUSSIAN"}
+                      {groupLabel}
                     </span>
                     <span className="text-[11px] text-muted-foreground/30">
                       {groupCiphers.filter((c) => enabledCiphers.has(c.id)).length}/{groupCiphers.length}
