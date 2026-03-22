@@ -268,6 +268,32 @@ export default function Index() {
 
   const enabledCount = enabledCiphers.size;
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
+  const [swipedId, setSwipedId] = useState<number | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
+  const swipeStartX = useRef<number>(0);
+  const swipeStartY = useRef<number>(0);
+
+  function deleteHistoryItem(id: number) {
+    setHistory((prev) => prev.filter((h) => h.id !== id));
+    setSwipedId(null);
+    setConfirmDeleteId(null);
+  }
+
+  function handleSwipeStart(e: React.TouchEvent, id: number) {
+    swipeStartX.current = e.touches[0].clientX;
+    swipeStartY.current = e.touches[0].clientY;
+  }
+
+  function handleSwipeEnd(e: React.TouchEvent, id: number) {
+    const dx = swipeStartX.current - e.changedTouches[0].clientX;
+    const dy = Math.abs(swipeStartY.current - e.changedTouches[0].clientY);
+    if (dx > 60 && dy < 40) {
+      setSwipedId(id);
+      setConfirmDeleteId(null);
+    } else if (dx < -20) {
+      setSwipedId(null);
+    }
+  }
 
   function toggleGroupCollapse(group: string) {
     setCollapsedGroups((prev) => {
@@ -431,44 +457,95 @@ export default function Index() {
                 — empty —
               </div>
             ) : (
-              <div className="overflow-y-auto flex-1">
-                {history.map((item, idx) => (
-                  <button
-                    key={item.id}
-                    onClick={() => { setText(item.text); setCommitted(item.text); resultKey.current += 1; }}
-                    className="animate-fade-in w-full text-left px-4 py-3 border-b border-border/40 hover:bg-secondary/50 transition-colors"
-                    style={{ animationDelay: `${idx * 20}ms` }}
-                  >
-                    {/* Word */}
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-foreground/90 text-[13px] truncate flex-1">
-                        {item.text.length > 26 ? item.text.slice(0, 26) + "…" : item.text}
-                      </span>
-                      <span className="text-muted-foreground/25 text-[10px] shrink-0 ml-2">{item.date}</span>
-                    </div>
-                    {/* Mini table */}
-                    <div className="border border-border/40 overflow-hidden">
-                      {/* Header row — cipher abbreviations */}
-                      <div className="flex border-b border-border/40" style={{ background: 'hsl(222 22% 10%)' }}>
-                        {item.results.map((r) => (
-                          <div key={r.cipherId} className="flex-1 min-w-0 px-1.5 py-1 text-center border-r border-border/30 last:border-0">
-                            <span className="text-[9px] text-muted-foreground/40 tracking-wider uppercase leading-none block truncate">
-                              {r.cipherLabel.replace(/[^A-ZА-ЯЁ]/g, "").slice(0, 3) || r.cipherLabel.slice(0, 3).toUpperCase()}
+              <div
+                className="overflow-y-auto flex-1"
+                onClick={(e) => {
+                  if (swipedId !== null) { e.stopPropagation(); setSwipedId(null); }
+                  if (confirmDeleteId !== null) setConfirmDeleteId(null);
+                }}
+              >
+                {history.map((item, idx) => {
+                  const isSwiped = swipedId === item.id;
+                  const isConfirming = confirmDeleteId === item.id;
+                  return (
+                    <div
+                      key={item.id}
+                      className="animate-fade-in relative border-b border-border/40 overflow-hidden"
+                      style={{ animationDelay: `${idx * 20}ms` }}
+                    >
+                      {/* Delete reveal (swipe or confirm) */}
+                      <div
+                        className={`absolute inset-y-0 right-0 flex items-center transition-all duration-200 ${isSwiped || isConfirming ? "w-24" : "w-0"}`}
+                        style={{ background: 'hsl(0 60% 30%)' }}
+                      >
+                        {isConfirming ? (
+                          <div className="flex w-full">
+                            <button
+                              className="flex-1 h-full text-[11px] text-white/80 hover:text-white tracking-widest uppercase px-2"
+                              onClick={(e) => { e.stopPropagation(); deleteHistoryItem(item.id); }}
+                            >
+                              YES
+                            </button>
+                            <button
+                              className="flex-1 h-full text-[11px] text-white/50 hover:text-white/80 tracking-widest uppercase px-2 border-l border-white/20"
+                              onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(null); setSwipedId(null); }}
+                            >
+                              NO
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            className="w-full h-full text-[11px] text-white/70 hover:text-white tracking-widest uppercase"
+                            onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(item.id); setSwipedId(null); }}
+                          >
+                            DEL
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Main content */}
+                      <div
+                        className={`transition-transform duration-200 ${isSwiped ? "-translate-x-24" : "translate-x-0"}`}
+                        onTouchStart={(e) => handleSwipeStart(e, item.id)}
+                        onTouchEnd={(e) => handleSwipeEnd(e, item.id)}
+                        onContextMenu={(e) => { e.preventDefault(); setSwipedId(item.id); setConfirmDeleteId(null); }}
+                      >
+                        <button
+                          className="w-full text-left px-4 py-3 hover:bg-secondary/50 transition-colors"
+                          onClick={() => {
+                            if (isSwiped) { setSwipedId(null); return; }
+                            setText(item.text); setCommitted(item.text); resultKey.current += 1;
+                          }}
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-foreground/90 text-[13px] truncate flex-1">
+                              {item.text.length > 26 ? item.text.slice(0, 26) + "…" : item.text}
                             </span>
+                            <span className="text-muted-foreground/25 text-[10px] shrink-0 ml-2">{item.date}</span>
                           </div>
-                        ))}
-                      </div>
-                      {/* Values row */}
-                      <div className="flex">
-                        {item.results.map((r) => (
-                          <div key={r.cipherId} className="flex-1 min-w-0 px-1.5 py-1.5 text-center border-r border-border/30 last:border-0">
-                            <span className="text-[12px] text-accent/80 leading-none block">{r.value}</span>
+                          <div className="border border-border/40 overflow-hidden">
+                            <div className="flex border-b border-border/40" style={{ background: 'hsl(222 22% 10%)' }}>
+                              {item.results.map((r) => (
+                                <div key={r.cipherId} className="flex-1 min-w-0 px-1.5 py-1 text-center border-r border-border/30 last:border-0">
+                                  <span className="text-[9px] text-muted-foreground/40 tracking-wider uppercase leading-none block truncate">
+                                    {r.cipherLabel.replace(/[^A-ZА-ЯЁ]/g, "").slice(0, 3) || r.cipherLabel.slice(0, 3).toUpperCase()}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                            <div className="flex">
+                              {item.results.map((r) => (
+                                <div key={r.cipherId} className="flex-1 min-w-0 px-1.5 py-1.5 text-center border-r border-border/30 last:border-0">
+                                  <span className="text-[12px] text-accent/80 leading-none block">{r.value}</span>
+                                </div>
+                              ))}
+                            </div>
                           </div>
-                        ))}
+                        </button>
                       </div>
                     </div>
-                  </button>
-                ))}
+                  );
+                })}
               </div>
             )}
           </aside>
