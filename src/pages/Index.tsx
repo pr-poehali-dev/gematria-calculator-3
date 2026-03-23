@@ -609,7 +609,7 @@ export default function Index() {
               className={`px-4 py-1.5 text-xs tracking-widest transition-colors duration-100 border-b-2 ${
                 tab === t
                   ? "text-accent border-accent"
-                  : "text-muted-foreground border-transparent hover:text-foreground"
+                  : "text-foreground/70 border-transparent hover:text-foreground"
               }`}
             >
               {label}
@@ -628,14 +628,14 @@ export default function Index() {
           <section className="flex-1 flex flex-col min-w-0">
             {/* Input bar */}
             <div className="border-b border-border px-4 py-3 flex items-center gap-3" style={{ background: 'hsl(222 25% 8%)' }}>
-              <span className="text-muted-foreground/40 text-xs shrink-0">&gt;</span>
+              <span className="text-foreground/50 text-xs shrink-0">&gt;</span>
               <input
                 ref={inputRef}
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleCalculate(); } }}
                 placeholder="enter word or phrase..."
-                className="flex-1 bg-transparent outline-none text-foreground placeholder:text-muted-foreground/30 text-sm"
+                className="flex-1 bg-transparent outline-none text-foreground placeholder:text-foreground/40 text-sm"
                 spellCheck={false}
                 autoComplete="off"
               />
@@ -653,7 +653,7 @@ export default function Index() {
                 <button
                   onClick={handleCalculate}
                   disabled={!hasText || activeCiphers.length === 0}
-                  className="px-3 py-1 text-xs border border-border text-muted-foreground hover:text-accent hover:border-accent/50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors tracking-widest uppercase"
+                  className="px-3 py-1 text-xs border border-border text-foreground/80 hover:text-accent hover:border-accent/50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors tracking-widest uppercase"
                 >
                   CALC
                 </button>
@@ -739,7 +739,7 @@ export default function Index() {
                   })}
                 </div>
               ) : (
-                <div className="flex items-center justify-center h-40 text-muted-foreground/50 text-xs tracking-widest uppercase">
+                <div className="flex items-center justify-center h-40 text-foreground/50 text-xs tracking-widest uppercase">
                   {activeCiphers.length === 0 ? "— select ciphers —" : "— enter text & press CALC —"}
                 </div>
               )}
@@ -753,9 +753,9 @@ export default function Index() {
           {/* Right — History */}
           <aside className="w-full lg:w-72 flex flex-col border-l-0">
             <div className="flex items-center justify-between px-4 py-2 border-b border-border" style={{ background: 'hsl(222 25% 8%)' }}>
-              <span className="text-[11px] tracking-widest uppercase text-muted-foreground/70">HISTORY</span>
+              <span className="text-[11px] tracking-widest uppercase text-foreground/80">HISTORY</span>
               {history.length > 0 && (
-                <button onClick={() => setHistory([])} className="text-[11px] text-muted-foreground/40 hover:text-muted-foreground transition-colors flex items-center gap-1">
+                <button onClick={() => setHistory([])} className="text-[11px] text-foreground/60 hover:text-foreground transition-colors flex items-center gap-1">
                   <Icon name="Trash2" size={10} /> CLR
                 </button>
               )}
@@ -840,20 +840,20 @@ export default function Index() {
                             <span className="text-foreground/90 text-[13px] truncate flex-1">
                               {item.text.length > 26 ? item.text.slice(0, 26) + "…" : item.text}
                             </span>
-                            <span className="text-muted-foreground/25 text-[10px] shrink-0 ml-2">{item.date}</span>
+                            <span className="text-foreground/50 text-[10px] shrink-0 ml-2">{item.date}</span>
                           </div>
                           <div
                             className="flex justify-center mb-1.5"
                             onTouchStart={(e) => { e.stopPropagation(); handleSwipeStart(e, item.id, true); handleTouchStartDrag(e, item.id); }}
                             onContextMenu={(e) => e.preventDefault()}
                           >
-                            <Icon name="GripHorizontal" size={12} className="text-muted-foreground/20 select-none" />
+                            <Icon name="GripHorizontal" size={12} className="text-foreground/40 select-none" />
                           </div>
                           <div className="border border-border/40 overflow-hidden">
                             <div className="flex border-b border-border/40" style={{ background: 'hsl(222 22% 10%)' }}>
                               {item.results.map((r) => (
                                 <div key={r.cipherId} className="flex-1 min-w-0 px-1.5 py-1 text-center border-r border-border/30 last:border-0">
-                                  <span className="text-[9px] text-muted-foreground/40 tracking-wider uppercase leading-none block truncate">
+                                  <span className="text-[9px] text-foreground/60 tracking-wider uppercase leading-none block truncate">
                                     {r.cipherLabel.replace(/[^A-ZА-ЯЁ]/g, "").slice(0, 3) || r.cipherLabel.slice(0, 3).toUpperCase()}
                                   </span>
                                 </div>
@@ -890,7 +890,7 @@ export default function Index() {
       {/* ── TAB: CIPHERS ── */}
       {tab === "ciphers" && (
         <main className="flex-1 overflow-y-auto">
-          <div className="px-4 py-2 border-b border-border text-[11px] text-muted-foreground/70 tracking-wide" style={{ background: 'hsl(222 25% 8%)' }}>
+          <div className="px-4 py-2 border-b border-border text-[11px] text-foreground/70 tracking-wide" style={{ background: 'hsl(222 25% 8%)' }}>
             Язык определяется автоматически · выбранные шифры сохраняются
           </div>
 
@@ -911,18 +911,18 @@ export default function Index() {
                     <Icon
                       name={isCollapsed ? "ChevronRight" : "ChevronDown"}
                       size={11}
-                      className="text-muted-foreground/40"
+                      className="text-foreground/60"
                     />
-                    <span className="text-[11px] tracking-widest uppercase text-muted-foreground/60">
+                    <span className="text-[11px] tracking-widest uppercase text-foreground/80">
                       {groupLabel}
                     </span>
-                    <span className="text-[11px] text-muted-foreground/30">
+                    <span className="text-[11px] text-foreground/50">
                       {groupCiphers.filter((c) => enabledCiphers.has(c.id)).length}/{groupCiphers.length}
                     </span>
                   </button>
                   <button
                     onClick={() => toggleGroup(group, !allEnabled)}
-                    className="text-[11px] text-muted-foreground/40 hover:text-accent transition-colors tracking-widest uppercase"
+                    className="text-[11px] text-foreground/60 hover:text-accent transition-colors tracking-widest uppercase"
                   >
                     {allEnabled ? "NONE" : "ALL"}
                   </button>
@@ -956,7 +956,7 @@ export default function Index() {
                         <span className="text-[11px] text-muted-foreground/25 hidden sm:block">{c.sublabel}</span>
                         <button
                           onClick={(e) => { e.preventDefault(); setExpandedCipherTable(tableOpen ? null : c.id); }}
-                          className="text-muted-foreground/30 hover:text-muted-foreground transition-colors"
+                          className="text-foreground/50 hover:text-foreground transition-colors"
                         >
                           <Icon name={tableOpen ? "ChevronUp" : "ChevronDown"} size={11} />
                         </button>
@@ -972,7 +972,7 @@ export default function Index() {
                                 className="flex flex-col items-center border-r border-b border-border/30 last:border-r-0"
                                 style={{ minWidth: '2.2rem' }}
                               >
-                                <span className="text-[11px] text-muted-foreground/50 px-1.5 py-1 border-b border-border/30 w-full text-center uppercase">
+                                <span className="text-[11px] text-foreground/70 px-1.5 py-1 border-b border-border/30 w-full text-center uppercase">
                                   {letter}
                                 </span>
                                 <span className="text-[11px] text-accent/70 px-1.5 py-1 w-full text-center">
