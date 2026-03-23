@@ -471,7 +471,7 @@ export default function Index() {
   const firstCipher = committedResults[0] ? CIPHERS.find((c) => c.id === committedResults[0].cipherId) : null;
 
   const enabledCount = enabledCiphers.size;
-  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
+  const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
   const [expandedCipherTable, setExpandedCipherTable] = useState<CipherId | null>(null);
   const [swipedId, setSwipedId] = useState<number | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
@@ -602,16 +602,7 @@ export default function Index() {
   }
 
   function toggleGroupCollapse(group: string) {
-    setCollapsedGroups((prev) => {
-      const allGroups = ["english", "russian", "church_slavonic", "hebrew", "greek", "arabic"];
-      if (prev.has(group)) {
-        const next = new Set(prev);
-        next.delete(group);
-        return next;
-      } else {
-        return new Set(allGroups.filter((g) => g !== group));
-      }
-    });
+    setExpandedGroup((prev) => prev === group ? null : group);
   }
 
   return (
@@ -942,7 +933,7 @@ export default function Index() {
           {(["english", "russian", "church_slavonic", "hebrew", "greek", "arabic"] as const).map((group) => {
             const groupCiphers = CIPHERS.filter((c) => c.group === group);
             const allEnabled = groupCiphers.every((c) => enabledCiphers.has(c.id));
-            const isCollapsed = collapsedGroups.has(group);
+            const isCollapsed = expandedGroup !== group;
             const groupLabel = { english: "ENGLISH", russian: "RUSSIAN", church_slavonic: "ЦЕРК.-СЛАВ.", hebrew: "HEBREW", greek: "GREEK", arabic: "ARABIC" }[group];
 
             return (
