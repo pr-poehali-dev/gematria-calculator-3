@@ -688,20 +688,21 @@ export default function Index() {
                           <span className="text-muted-foreground/30 text-[11px] w-6 shrink-0">{i + 1}</span>
                           <span className="text-foreground/80 text-[13px] flex-1 truncate">{r.cipherLabel}</span>
                           <span className="text-muted-foreground/30 text-[11px] w-16 text-right hidden sm:block truncate">{cipher.sublabel}</span>
-                          <span className="text-muted-foreground/40 text-[11px] w-12 text-right">{r.reduced}</span>
-                          {concatMatch && (
-                            <span className="w-14 flex justify-end mr-1 shrink-0 group relative">
-                              {concatMatch.style === "box" ? (
-                                <span className="text-[11px] font-medium px-1 py-0.5 leading-none cursor-default" style={{ background: '#facc15', color: '#000' }}>{concatMatch.number}</span>
-                              ) : (
-                                <span className="text-[11px] text-accent font-medium cursor-default" style={{ borderBottom: '2px solid #facc15' }}>{concatMatch.number}</span>
-                              )}
-                              <span className="pointer-events-none absolute bottom-full right-0 mb-1.5 whitespace-nowrap rounded bg-popover border border-border px-2 py-1 text-[10px] text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity z-50 shadow-md">
-                                {chars.map(c => c.value).join(" · ")} → {concatMatch.number}
-                              </span>
-                            </span>
-                          )}
-                          <span className={concatMatch ? "w-14 flex justify-end" : "w-16 flex justify-end"}>
+                          <span className="w-12 flex justify-end group relative">
+                            {concatMatch ? (
+                              <>
+                                {concatMatch.style === "box" ? (
+                                  <span className="text-[11px] font-medium px-1 py-0.5 leading-none cursor-default" style={{ background: '#facc15', color: '#000' }}>{concatMatch.number}</span>
+                                ) : (
+                                  <span className="text-[11px] text-accent font-medium cursor-default" style={{ borderBottom: '2px solid #facc15' }}>{concatMatch.number}</span>
+                                )}
+                                <span className="pointer-events-none absolute bottom-full right-0 mb-1.5 whitespace-nowrap rounded bg-popover border border-border px-2 py-1 text-[10px] text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity z-50 shadow-md">
+                                  {chars.map(c => c.value).join(" · ")} → {concatMatch.number}
+                                </span>
+                              </>
+                            ) : null}
+                          </span>
+                          <span className="w-16 flex justify-end">
                             {(() => {
                               const hs = getValueStyle(r.value);
                               if (hs === "box") return (
