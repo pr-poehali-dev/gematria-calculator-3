@@ -245,7 +245,7 @@ interface CharInfo { char: string; value: number; isSpace: boolean }
 interface HistoryItem {
   id: number;
   text: string;
-  results: { cipherId: CipherId; cipherLabel: string; value: number; reduced: number }[];
+  results: { cipherId: CipherId; cipherLabel: string; value: number; reduced: number; order?: { number: number; style: "box" | "underline" } | null }[];
   date: string;
 }
 
@@ -427,7 +427,9 @@ export default function Index() {
     setCommitted(trimmed);
     const results = activeCiphers.map((c) => {
       const val = sumText(trimmed, c.table);
-      return { cipherId: c.id, cipherLabel: c.label, value: val, reduced: digitalRoot(val) };
+      const chars = parseChars(trimmed, c.table).filter(ch => !ch.isSpace);
+      const order = findConcatMatch(chars.map(ch => ch.value));
+      return { cipherId: c.id, cipherLabel: c.label, value: val, reduced: digitalRoot(val), order };
     });
     setHistory((prev) => [
       { id: Date.now(), text: trimmed, results, date: formatDate() },
@@ -678,7 +680,7 @@ export default function Index() {
                     <span className="text-foreground/80 text-[11px] w-6 shrink-0">#</span>
                     <span className="text-foreground/80 text-[11px] flex-1">CIPHER</span>
                     <span className="text-foreground/80 text-[11px] w-16 text-right hidden sm:block">WORD</span>
-                    <span className="text-foreground/80 text-[11px] w-12 text-right">ROOT</span>
+                    <span className="text-foreground/80 text-[11px] w-12 text-right">ORDER</span>
                     <span className="text-foreground/80 text-[11px] w-16 text-right">VALUE</span>
                     <span className="w-6 shrink-0" />
                   </div>
@@ -869,7 +871,7 @@ export default function Index() {
                                 </div>
                               ))}
                             </div>
-                            <div className="flex">
+                            <div className="flex border-b border-border/40">
                               {item.results.map((r) => (
                                 <div key={r.cipherId} className="flex-1 min-w-0 px-1 py-1 text-center border-r border-border/30 last:border-0 flex items-center justify-center">
                                   {(() => {
@@ -885,6 +887,23 @@ export default function Index() {
                                 </div>
                               ))}
                             </div>
+                            {item.results.some(r => r.order) && (
+                              <div className="flex" style={{ background: 'hsl(222 22% 8%)' }}>
+                                {item.results.map((r) => (
+                                  <div key={r.cipherId} className="flex-1 min-w-0 px-1 py-1 text-center border-r border-border/30 last:border-0 flex items-center justify-center">
+                                    {r.order ? (
+                                      r.order.style === "box" ? (
+                                        <span className="text-[10px] font-medium leading-none px-0.5" style={{ background: '#facc15', color: '#000' }}>{r.order.number}</span>
+                                      ) : (
+                                        <span className="text-[11px] text-accent/80 leading-none" style={{ borderBottom: '1.5px solid #facc15' }}>{r.order.number}</span>
+                                      )
+                                    ) : (
+                                      <span className="text-[10px] text-foreground/20">—</span>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         </button>
                       </div>
