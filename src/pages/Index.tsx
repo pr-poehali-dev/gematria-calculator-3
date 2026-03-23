@@ -603,9 +603,14 @@ export default function Index() {
 
   function toggleGroupCollapse(group: string) {
     setCollapsedGroups((prev) => {
-      const next = new Set(prev);
-      if (next.has(group)) { next.delete(group); } else { next.add(group); }
-      return next;
+      const allGroups = ["english", "russian", "church_slavonic", "hebrew", "greek", "arabic"];
+      if (prev.has(group)) {
+        const next = new Set(prev);
+        next.delete(group);
+        return next;
+      } else {
+        return new Set(allGroups.filter((g) => g !== group));
+      }
     });
   }
 
