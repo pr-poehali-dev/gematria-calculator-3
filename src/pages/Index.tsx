@@ -666,11 +666,11 @@ export default function Index() {
                 <div key={resultKey.current} className="animate-fade-in">
                   {/* Table header */}
                   <div className="flex items-center border-b border-border px-4 py-1.5 sticky top-0 z-10" style={{ background: 'hsl(222 25% 8%)' }}>
-                    <span className="text-muted-foreground/40 text-[11px] w-6 shrink-0">#</span>
-                    <span className="text-muted-foreground/40 text-[11px] flex-1">CIPHER</span>
-                    <span className="text-muted-foreground/40 text-[11px] w-16 text-right hidden sm:block">WORD</span>
-                    <span className="text-muted-foreground/40 text-[11px] w-12 text-right">ROOT</span>
-                    <span className="text-muted-foreground/40 text-[11px] w-16 text-right">VALUE</span>
+                    <span className="text-muted-foreground/60 text-[11px] w-6 shrink-0">#</span>
+                    <span className="text-muted-foreground/60 text-[11px] flex-1">CIPHER</span>
+                    <span className="text-muted-foreground/60 text-[11px] w-16 text-right hidden sm:block">WORD</span>
+                    <span className="text-muted-foreground/60 text-[11px] w-12 text-right">ROOT</span>
+                    <span className="text-muted-foreground/60 text-[11px] w-16 text-right">VALUE</span>
                     <span className="w-6 shrink-0" />
                   </div>
 
@@ -739,7 +739,7 @@ export default function Index() {
                   })}
                 </div>
               ) : (
-                <div className="flex items-center justify-center h-40 text-muted-foreground/20 text-xs tracking-widest uppercase">
+                <div className="flex items-center justify-center h-40 text-muted-foreground/50 text-xs tracking-widest uppercase">
                   {activeCiphers.length === 0 ? "— select ciphers —" : "— enter text & press CALC —"}
                 </div>
               )}
@@ -753,7 +753,7 @@ export default function Index() {
           {/* Right — History */}
           <aside className="w-full lg:w-72 flex flex-col border-l-0">
             <div className="flex items-center justify-between px-4 py-2 border-b border-border" style={{ background: 'hsl(222 25% 8%)' }}>
-              <span className="text-[11px] tracking-widest uppercase text-muted-foreground/50">HISTORY</span>
+              <span className="text-[11px] tracking-widest uppercase text-muted-foreground/70">HISTORY</span>
               {history.length > 0 && (
                 <button onClick={() => setHistory([])} className="text-[11px] text-muted-foreground/40 hover:text-muted-foreground transition-colors flex items-center gap-1">
                   <Icon name="Trash2" size={10} /> CLR
@@ -762,7 +762,7 @@ export default function Index() {
             </div>
 
             {history.length === 0 ? (
-              <div className="flex-1 flex items-center justify-center text-muted-foreground/20 text-xs tracking-widest uppercase">
+              <div className="flex-1 flex items-center justify-center text-muted-foreground/50 text-xs tracking-widest uppercase">
                 — empty —
               </div>
             ) : (
@@ -890,7 +890,7 @@ export default function Index() {
       {/* ── TAB: CIPHERS ── */}
       {tab === "ciphers" && (
         <main className="flex-1 overflow-y-auto">
-          <div className="px-4 py-2 border-b border-border text-[11px] text-muted-foreground/40 tracking-wide" style={{ background: 'hsl(222 25% 8%)' }}>
+          <div className="px-4 py-2 border-b border-border text-[11px] text-muted-foreground/70 tracking-wide" style={{ background: 'hsl(222 25% 8%)' }}>
             Язык определяется автоматически · выбранные шифры сохраняются
           </div>
 
