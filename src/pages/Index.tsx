@@ -260,7 +260,11 @@ function stripDiacritics(char: string): string {
 }
 
 function getCharValue(char: string, table: Record<string, number>): number {
-  return table[char.toLowerCase()] ?? 0;
+  const fromTable = table[char.toLowerCase()];
+  if (fromTable !== undefined) return fromTable;
+  const digit = parseInt(char, 10);
+  if (!isNaN(digit)) return digit;
+  return 0;
 }
 
 function parseChars(text: string, table: Record<string, number>): CharInfo[] {
