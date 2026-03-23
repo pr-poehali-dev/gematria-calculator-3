@@ -325,6 +325,15 @@ function getValueStyle(val: number): "box" | "underline" | null {
 // For 2–3 letter words: check if concatenation of letter values forms a highlighted number
 // e.g. values [3, 58] → "358" → in HIGHLIGHT_BOX
 function findConcatMatch(values: number[]): { number: number; style: "box" | "underline" } | null {
+  // single value 1-9: show if highlighted
+  if (values.length === 1) {
+    const v = values[0];
+    if (v >= 1 && v <= 9) {
+      const style = getValueStyle(v);
+      if (style) return { number: v, style };
+    }
+    return null;
+  }
   if (values.length < 2 || values.length > 3) return null;
   const concat = Number(values.join(""));
   const style = getValueStyle(concat);
