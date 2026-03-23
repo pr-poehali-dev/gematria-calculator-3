@@ -262,17 +262,32 @@ function stripDiacritics(char: string): string {
 function getCharValue(char: string, table: Record<string, number>): number {
   const fromTable = table[char.toLowerCase()];
   if (fromTable !== undefined) return fromTable;
-  const digit = parseInt(char, 10);
-  if (!isNaN(digit)) return digit;
   return 0;
 }
 
 function parseChars(text: string, table: Record<string, number>): CharInfo[] {
-  return text.split("").flatMap((char) => {
-    const stripped = stripDiacritics(char);
-    if (stripped === "") return []; // diacritic-only char, skip
-    return [{ char: stripped, value: getCharValue(stripped, table), isSpace: stripped === " " }];
-  });
+  const result: CharInfo[] = [];
+  let i = 0;
+  while (i < text.length) {
+    const raw = text[i];
+    const stripped = stripDiacritics(raw);
+    if (stripped === "") { i++; continue; }
+    // Collect consecutive digit characters into one number token
+    if (/\d/.test(stripped)) {
+      let numStr = stripped;
+      let j = i + 1;
+      while (j < text.length && /\d/.test(stripDiacritics(text[j]))) {
+        numStr += stripDiacritics(text[j]);
+        j++;
+      }
+      result.push({ char: numStr, value: parseInt(numStr, 10), isSpace: false });
+      i = j;
+      continue;
+    }
+    result.push({ char: stripped, value: getCharValue(stripped, table), isSpace: stripped === " " });
+    i++;
+  }
+  return result;
 }
 
 function sumText(text: string, table: Record<string, number>): number {
