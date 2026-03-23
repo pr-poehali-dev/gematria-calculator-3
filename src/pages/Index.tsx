@@ -675,11 +675,11 @@ export default function Index() {
                 <div key={resultKey.current} className="animate-fade-in">
                   {/* Table header */}
                   <div className="flex items-center border-b border-border px-4 py-1.5 sticky top-0 z-10" style={{ background: 'hsl(222 25% 8%)' }}>
-                    <span className="text-foreground/60 text-[11px] w-6 shrink-0">#</span>
-                    <span className="text-foreground/60 text-[11px] flex-1">CIPHER</span>
-                    <span className="text-foreground/60 text-[11px] w-16 text-right hidden sm:block">WORD</span>
-                    <span className="text-foreground/60 text-[11px] w-12 text-right">ROOT</span>
-                    <span className="text-foreground/60 text-[11px] w-16 text-right">VALUE</span>
+                    <span className="text-foreground/80 text-[11px] w-6 shrink-0">#</span>
+                    <span className="text-foreground/80 text-[11px] flex-1">CIPHER</span>
+                    <span className="text-foreground/80 text-[11px] w-16 text-right hidden sm:block">WORD</span>
+                    <span className="text-foreground/80 text-[11px] w-12 text-right">ROOT</span>
+                    <span className="text-foreground/80 text-[11px] w-16 text-right">VALUE</span>
                     <span className="w-6 shrink-0" />
                   </div>
 
