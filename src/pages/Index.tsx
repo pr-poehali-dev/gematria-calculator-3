@@ -164,8 +164,8 @@ function detectLang(text: string): "english" | "russian" | "church_slavonic" | "
   const he = (text.match(/[\u05D0-\u05EA\u05F0-\u05F4]/g) || []).length;
   const gr = (text.match(/[\u0370-\u03FF\u1F00-\u1FFF]/g) || []).length;
   const ar = (text.match(/[\u0600-\u06FF]/g) || []).length;
-  // Church Slavonic: archaic Cyrillic letters unique to OCS (ѕ ѯ ѱ ѡ ѿ ѳ ѵ ѣ ї і)
-  const cs = (text.match(/[ѕѯѱѡѿѳѵѣїі]/g) || []).length;
+  // Church Slavonic: archaic Cyrillic letters unique to OCS (lower + upper)
+  const cs = (text.match(/[ѕѯѱѡѿѳѵѣїі\u0405\u046E\u0470\u0460\u047E\u0472\u0474\u0462\u0407\u0406]/g) || []).length;
   const max = Math.max(ru, en, he, gr, ar);
   if (max === 0 && cs === 0) return null;
   if (cs > 0) return "church_slavonic";
