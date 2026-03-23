@@ -441,17 +441,28 @@ export default function Index() {
   function toggleCipher(id: CipherId) {
     setEnabledCiphers((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) { next.delete(id); } else { next.add(id); }
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        const cipher = CIPHERS.find((c) => c.id === id);
+        if (cipher) {
+          CIPHERS.filter((c) => c.group !== cipher.group).forEach((c) => next.delete(c.id));
+        }
+        next.add(id);
+      }
       return next;
     });
   }
 
-  function toggleGroup(group: "english" | "russian" | "hebrew" | "greek" | "arabic", enable: boolean) {
+  function toggleGroup(group: "english" | "russian" | "church_slavonic" | "hebrew" | "greek" | "arabic", enable: boolean) {
     setEnabledCiphers((prev) => {
       const next = new Set(prev);
-      CIPHERS.filter((c) => c.group === group).forEach((c) => {
-        if (enable) next.add(c.id); else next.delete(c.id);
-      });
+      if (enable) {
+        CIPHERS.filter((c) => c.group !== group).forEach((c) => next.delete(c.id));
+        CIPHERS.filter((c) => c.group === group).forEach((c) => next.add(c.id));
+      } else {
+        CIPHERS.filter((c) => c.group === group).forEach((c) => next.delete(c.id));
+      }
       return next;
     });
   }
