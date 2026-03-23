@@ -186,9 +186,9 @@ type CipherId =
   | "en_qaballa" | "en_illuminati_novice" | "en_illuminati_reverse"
   | "ru_ordinal" | "ru_reduction" | "ru_reverse_ordinal" | "ru_reverse_reduction"
   | "ru_sumerian" | "ru_reverse_sumerian"
-  | "cs_gematria" | "cs_ordinal"
+  | "cs_gematria"
   | "he_ordinal" | "he_reduction" | "he_gematria" | "he_soffits"
-  | "gr_isopsephy" | "gr_ordinal" | "gr_reduction" | "gr_ordinal_24"
+  | "gr_isopsephy" | "gr_ordinal" | "gr_reduction"
   | "ar_abjad" | "ar_ordinal";
 
 interface Cipher {
@@ -222,7 +222,7 @@ const CIPHERS: Cipher[] = [
   { id: "ru_reverse_sumerian",   label: "Russian R Sumerian",  sublabel: "Я=6 … А=198",           table: RU_REVERSE_SUMERIAN,   group: "russian" },
   // Church Slavonic
   { id: "cs_gematria",           label: "ЦС Гематрия",         sublabel: "а=1 … ѿ=900",           table: CS_GEMATRIA,           group: "church_slavonic" },
-  { id: "cs_ordinal",            label: "ЦС Порядковый",       sublabel: "а=1 … ѿ=41",            table: CS_ORDINAL,            group: "church_slavonic" },
+
   // Hebrew
   { id: "he_gematria",           label: "Hebrew Gematria",     sublabel: "א=1 … ת=400",           table: HE_GEMATRIA,           group: "hebrew" },
   { id: "he_soffits",            label: "Hebrew Soffits",      sublabel: "incl. finals ך–ץ",       table: HE_SOFFITS,            group: "hebrew" },
@@ -231,7 +231,7 @@ const CIPHERS: Cipher[] = [
   // Greek
   { id: "gr_isopsephy",          label: "Greek Isopsephy",     sublabel: "α=1 … ω=800",           table: GR_ISOPSEPHY,          group: "greek" },
   { id: "gr_ordinal",            label: "Greek Ordinal",       sublabel: "α=1 … ω=24",            table: GR_ORDINAL,            group: "greek" },
-  { id: "gr_ordinal_24",         label: "Greek Ordinal 24",    sublabel: "α=1 … ω=24",            table: GR_ORDINAL_24,         group: "greek" },
+
   { id: "gr_reduction",          label: "Greek Reduction",     sublabel: "цикл 1–9",              table: GR_REDUCTION,          group: "greek" },
   // Arabic
   { id: "ar_abjad",              label: "Arabic Abjad",        sublabel: "ا=1 … غ=1000",          table: AR_ABJAD,              group: "arabic" },
