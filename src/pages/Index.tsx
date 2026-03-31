@@ -391,6 +391,7 @@ export default function Index() {
   const [history, setHistory] = useState<HistoryItem[]>(loadHistory);
   const [showBreakdownFor, setShowBreakdownFor] = useState<CipherId | null>(null);
   const [showCSKeyboard, setShowCSKeyboard] = useState(false);
+  const [showGRKeyboard, setShowGRKeyboard] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const resultKey = useRef(0);
 
@@ -451,6 +452,7 @@ export default function Index() {
     ]);
     setShowBreakdownFor(null);
     setShowCSKeyboard(false);
+    setShowGRKeyboard(false);
   }
 
   function toggleCipher(id: CipherId) {
@@ -667,8 +669,8 @@ export default function Index() {
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleCalculate(); } }}
-                onFocus={() => setShowCSKeyboard(true)}
-                onBlur={(e) => { if (!e.relatedTarget?.closest?.('[data-cskeyboard]')) setShowCSKeyboard(false); }}
+                onFocus={() => {}}
+                onBlur={(e) => { if (!e.relatedTarget?.closest?.('[data-cskeyboard]') && !e.relatedTarget?.closest?.('[data-grkeyboard]')) { setShowCSKeyboard(false); setShowGRKeyboard(false); } }}
                 placeholder="enter word or phrase..."
                 className="flex-1 bg-transparent outline-none text-foreground placeholder:text-foreground/40 text-sm"
                 spellCheck={false}
@@ -687,6 +689,13 @@ export default function Index() {
                   className={`text-[11px] px-1.5 py-0.5 border transition-colors tracking-wider ${showCSKeyboard ? "border-accent text-accent" : "border-border text-foreground/40 hover:text-foreground/70 hover:border-border/80"}`}
                 >
                   ЦСЯ
+                </button>
+                <button
+                  onClick={() => setShowGRKeyboard(v => !v)}
+                  title="Греческая клавиатура"
+                  className={`text-[11px] px-1.5 py-0.5 border transition-colors tracking-wider ${showGRKeyboard ? "border-accent text-accent" : "border-border text-foreground/40 hover:text-foreground/70 hover:border-border/80"}`}
+                >
+                  GR
                 </button>
                 {hasText && (
                   <button onClick={() => { setText(""); setCommitted(""); }} className="text-muted-foreground/40 hover:text-muted-foreground transition-colors">
@@ -711,6 +720,33 @@ export default function Index() {
                   ['й','к','л','м','н','о','п','р','с','т','у','ф'],
                   ['х','ц','ч','ш','щ','ъ','ы','ь','ѣ','э','ю','я'],
                   ['ѳ','ѵ','ѯ','ѱ','ѡ','ѿ',' ','⌫'],
+                ].map((row, ri) => (
+                  <div key={ri} className="flex gap-1 flex-wrap">
+                    {row.map((ch) => (
+                      <button
+                        key={ch}
+                        onMouseDown={(e) => { e.preventDefault(); if (ch === '⌫') { setText(t => t.slice(0, -1)); } else { insertCSChar(ch); } }}
+                        className={`flex items-center justify-center border border-border/60 text-foreground/80 hover:text-accent hover:border-accent/40 transition-colors select-none
+                          ${ch === ' ' ? 'flex-1 text-[10px] text-foreground/30 tracking-widest' : 'min-w-[32px] h-8 text-sm'}
+                          ${ch === '⌫' ? 'px-3 text-foreground/40 hover:text-red-400 hover:border-red-400/40 text-xs' : ''}
+                        `}
+                        style={{ background: 'hsl(222 25% 10%)' }}
+                      >
+                        {ch === ' ' ? 'SPACE' : ch}
+                      </button>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Greek virtual keyboard */}
+            {showGRKeyboard && (
+              <div data-grkeyboard className="border-b border-border px-3 py-2 flex flex-col gap-1.5" style={{ background: 'hsl(222 25% 6%)' }}>
+                {[
+                  ['α','β','γ','δ','ε','ζ','η','θ','ι','κ','λ','μ'],
+                  ['ν','ξ','ο','π','ρ','σ','ς','τ','υ','φ','χ','ψ'],
+                  ['ω','ϛ','ϙ','ϡ',' ','⌫'],
                 ].map((row, ri) => (
                   <div key={ri} className="flex gap-1 flex-wrap">
                     {row.map((ch) => (
