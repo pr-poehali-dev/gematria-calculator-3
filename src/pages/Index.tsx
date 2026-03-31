@@ -421,6 +421,7 @@ export default function Index() {
   };
 
   const detectedLang = detectLang(text);
+  const effectiveLang = showCSKeyboard ? "church_slavonic" : showGRKeyboard ? "greek" : detectedLang;
   const hasText = text.trim().length > 0;
 
   useEffect(() => {
@@ -431,12 +432,12 @@ export default function Index() {
   // Ciphers to use for calculation — filtered by detected language
   const activeCiphers = CIPHERS.filter((c) => {
     if (!enabledCiphers.has(c.id)) return false;
-    if (detectedLang === "russian") return c.group === "russian";
-    if (detectedLang === "church_slavonic") return c.group === "church_slavonic";
-    if (detectedLang === "english") return c.group === "english" || c.group === "english_extended";
-    if (detectedLang === "hebrew") return c.group === "hebrew";
-    if (detectedLang === "greek") return c.group === "greek";
-    if (detectedLang === "arabic") return c.group === "arabic";
+    if (effectiveLang === "russian") return c.group === "russian";
+    if (effectiveLang === "church_slavonic") return c.group === "church_slavonic";
+    if (effectiveLang === "english") return c.group === "english" || c.group === "english_extended";
+    if (effectiveLang === "hebrew") return c.group === "hebrew";
+    if (effectiveLang === "greek") return c.group === "greek";
+    if (effectiveLang === "arabic") return c.group === "arabic";
     return true;
   });
 
@@ -685,12 +686,12 @@ export default function Index() {
                 className="flex-1 bg-transparent outline-none text-foreground placeholder:text-foreground/40 text-sm"
                 spellCheck={false}
                 autoComplete="off"
-                readOnly={showCSKeyboard}
+                readOnly={showCSKeyboard || showGRKeyboard}
               />
               <div className="flex items-center gap-3 shrink-0">
-                {detectedLang && (
+                {effectiveLang && (
                   <span className="text-[11px] text-accent/70 hidden sm:block">
-                    {{ english: "EN", russian: "RU", church_slavonic: "ЦСЯ", hebrew: "HE", greek: "GR", arabic: "AR" }[detectedLang]} · {activeCiphers.length}
+                    {{ english: "EN", russian: "RU", church_slavonic: "ЦСЯ", hebrew: "HE", greek: "GR", arabic: "AR" }[effectiveLang]} · {activeCiphers.length}
                   </span>
                 )}
 
