@@ -450,6 +450,7 @@ export default function Index() {
       ...prev.slice(0, 49),
     ]);
     setShowBreakdownFor(null);
+    setShowCSKeyboard(false);
   }
 
   function toggleCipher(id: CipherId) {
