@@ -392,6 +392,8 @@ export default function Index() {
   const [showBreakdownFor, setShowBreakdownFor] = useState<CipherId | null>(null);
   const [showCSKeyboard, setShowCSKeyboard] = useState(false);
   const [showGRKeyboard, setShowGRKeyboard] = useState(false);
+  const [showHEKeyboard, setShowHEKeyboard] = useState(false);
+  const [showARKeyboard, setShowARKeyboard] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const resultKey = useRef(0);
 
@@ -421,12 +423,14 @@ export default function Index() {
   };
 
   const detectedLang = detectLang(text);
-  const effectiveLang = showCSKeyboard ? "church_slavonic" : showGRKeyboard ? "greek" : detectedLang;
+  const effectiveLang = showCSKeyboard ? "church_slavonic" : showGRKeyboard ? "greek" : showHEKeyboard ? "hebrew" : showARKeyboard ? "arabic" : detectedLang;
   const hasText = text.trim().length > 0;
 
   useEffect(() => {
-    if (detectedLang === "church_slavonic") { setShowCSKeyboard(true); setShowGRKeyboard(false); }
-    else if (detectedLang === "greek") { setShowGRKeyboard(true); setShowCSKeyboard(false); }
+    if (detectedLang === "church_slavonic") { setShowCSKeyboard(true); setShowGRKeyboard(false); setShowHEKeyboard(false); setShowARKeyboard(false); }
+    else if (detectedLang === "greek") { setShowGRKeyboard(true); setShowCSKeyboard(false); setShowHEKeyboard(false); setShowARKeyboard(false); }
+    else if (detectedLang === "hebrew") { setShowHEKeyboard(true); setShowCSKeyboard(false); setShowGRKeyboard(false); setShowARKeyboard(false); }
+    else if (detectedLang === "arabic") { setShowARKeyboard(true); setShowCSKeyboard(false); setShowGRKeyboard(false); setShowHEKeyboard(false); }
   }, [detectedLang]);
 
   // Ciphers to use for calculation — filtered by detected language
@@ -459,6 +463,8 @@ export default function Index() {
     setShowBreakdownFor(null);
     setShowCSKeyboard(false);
     setShowGRKeyboard(false);
+    setShowHEKeyboard(false);
+    setShowARKeyboard(false);
   }
 
   function toggleCipher(id: CipherId) {
@@ -678,15 +684,19 @@ export default function Index() {
                 onFocus={() => {
                   const hasCS = CIPHERS.some(c => c.group === "church_slavonic" && enabledCiphers.has(c.id));
                   const hasGR = CIPHERS.some(c => c.group === "greek" && enabledCiphers.has(c.id));
-                  if (detectedLang === "greek" || (!detectedLang && hasGR && !hasCS)) { setShowGRKeyboard(true); setShowCSKeyboard(false); }
-                  else if (hasCS) { setShowCSKeyboard(true); setShowGRKeyboard(false); }
+                  const hasHE = CIPHERS.some(c => c.group === "hebrew" && enabledCiphers.has(c.id));
+                  const hasAR = CIPHERS.some(c => c.group === "arabic" && enabledCiphers.has(c.id));
+                  if (detectedLang === "greek" || (!detectedLang && hasGR && !hasCS && !hasHE && !hasAR)) { setShowGRKeyboard(true); }
+                  else if (detectedLang === "hebrew" || (!detectedLang && hasHE && !hasCS && !hasGR && !hasAR)) { setShowHEKeyboard(true); }
+                  else if (detectedLang === "arabic" || (!detectedLang && hasAR && !hasCS && !hasGR && !hasHE)) { setShowARKeyboard(true); }
+                  else if (hasCS) { setShowCSKeyboard(true); }
                 }}
-                onBlur={(e) => { if (!e.relatedTarget?.closest?.('[data-cskeyboard]') && !e.relatedTarget?.closest?.('[data-grkeyboard]')) { setShowCSKeyboard(false); setShowGRKeyboard(false); } }}
+                onBlur={(e) => { if (!e.relatedTarget?.closest?.('[data-cskeyboard]') && !e.relatedTarget?.closest?.('[data-grkeyboard]') && !e.relatedTarget?.closest?.('[data-hekeyboard]') && !e.relatedTarget?.closest?.('[data-arkeyboard]')) { setShowCSKeyboard(false); setShowGRKeyboard(false); setShowHEKeyboard(false); setShowARKeyboard(false); } }}
                 placeholder="enter word or phrase..."
                 className="flex-1 bg-transparent outline-none text-foreground placeholder:text-foreground/40 text-sm"
                 spellCheck={false}
                 autoComplete="off"
-                readOnly={showCSKeyboard || showGRKeyboard}
+                readOnly={showCSKeyboard || showGRKeyboard || showHEKeyboard || showARKeyboard}
               />
               <div className="flex items-center gap-3 shrink-0">
                 {effectiveLang && (
@@ -751,6 +761,60 @@ export default function Index() {
                   ['α','β','γ','δ','ε','ζ','η','θ','ι','κ','λ','μ'],
                   ['ν','ξ','ο','π','ρ','σ','ς','τ','υ','φ','χ','ψ'],
                   ['ω','ϛ','ϙ','ϡ',' ','⌫'],
+                ].map((row, ri) => (
+                  <div key={ri} className="flex gap-1 flex-wrap">
+                    {row.map((ch) => (
+                      <button
+                        key={ch}
+                        onMouseDown={(e) => { e.preventDefault(); if (ch === '⌫') { setText(t => t.slice(0, -1)); } else { insertCSChar(ch); } }}
+                        className={`flex items-center justify-center border border-border/60 text-foreground/80 hover:text-accent hover:border-accent/40 transition-colors select-none
+                          ${ch === ' ' ? 'flex-1 text-[10px] text-foreground/30 tracking-widest' : 'min-w-[32px] h-8 text-sm'}
+                          ${ch === '⌫' ? 'px-3 text-foreground/40 hover:text-red-400 hover:border-red-400/40 text-xs' : ''}
+                        `}
+                        style={{ background: 'hsl(222 25% 10%)' }}
+                      >
+                        {ch === ' ' ? 'SPACE' : ch}
+                      </button>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Hebrew virtual keyboard */}
+            {showHEKeyboard && (
+              <div data-hekeyboard className="border-b border-border px-3 py-2 flex flex-col gap-1.5" style={{ background: 'hsl(222 25% 6%)' }}>
+                {[
+                  ['א','ב','ג','ד','ה','ו','ז','ח','ט','י','כ','ך'],
+                  ['ל','מ','ם','נ','ן','ס','ע','פ','ף','צ','ץ','ק'],
+                  ['ר','ש','ת',' ','⌫'],
+                ].map((row, ri) => (
+                  <div key={ri} className="flex gap-1 flex-wrap">
+                    {row.map((ch) => (
+                      <button
+                        key={ch}
+                        onMouseDown={(e) => { e.preventDefault(); if (ch === '⌫') { setText(t => t.slice(0, -1)); } else { insertCSChar(ch); } }}
+                        className={`flex items-center justify-center border border-border/60 text-foreground/80 hover:text-accent hover:border-accent/40 transition-colors select-none
+                          ${ch === ' ' ? 'flex-1 text-[10px] text-foreground/30 tracking-widest' : 'min-w-[32px] h-8 text-sm'}
+                          ${ch === '⌫' ? 'px-3 text-foreground/40 hover:text-red-400 hover:border-red-400/40 text-xs' : ''}
+                        `}
+                        style={{ background: 'hsl(222 25% 10%)' }}
+                      >
+                        {ch === ' ' ? 'SPACE' : ch}
+                      </button>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Arabic virtual keyboard */}
+            {showARKeyboard && (
+              <div data-arkeyboard className="border-b border-border px-3 py-2 flex flex-col gap-1.5" style={{ background: 'hsl(222 25% 6%)' }}>
+                {[
+                  ['ا','أ','إ','آ','ء','ب','ت','ة','ث','ج','ح','خ'],
+                  ['د','ذ','ر','ز','س','ش','ص','ض','ط','ظ','ع','غ'],
+                  ['ف','ق','ك','ل','م','ن','ه','و','ي','ى',' ','⌫'],
                 ].map((row, ri) => (
                   <div key={ri} className="flex gap-1 flex-wrap">
                     {row.map((ch) => (
