@@ -668,6 +668,7 @@ export default function Index() {
                 onChange={(e) => setText(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleCalculate(); } }}
                 onFocus={() => setShowCSKeyboard(true)}
+                onBlur={(e) => { if (!e.relatedTarget?.closest?.('[data-cskeyboard]')) setShowCSKeyboard(false); }}
                 placeholder="enter word or phrase..."
                 className="flex-1 bg-transparent outline-none text-foreground placeholder:text-foreground/40 text-sm"
                 spellCheck={false}
@@ -704,7 +705,7 @@ export default function Index() {
 
             {/* Church Slavonic virtual keyboard */}
             {showCSKeyboard && (
-              <div className="border-b border-border px-3 py-2 flex flex-col gap-1.5" style={{ background: 'hsl(222 25% 6%)' }}>
+              <div data-cskeyboard className="border-b border-border px-3 py-2 flex flex-col gap-1.5" style={{ background: 'hsl(222 25% 6%)' }}>
                 {[
                   ['а','в','г','д','є','е','ж','ѕ','з','и','і','ї'],
                   ['й','к','л','м','н','о','п','р','с','т','у','ф'],
