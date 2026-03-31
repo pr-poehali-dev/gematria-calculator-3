@@ -314,7 +314,7 @@ const HIGHLIGHT_BOX = new Set([
   239, 932, 236, 632, 88, 313, 358, 853, 33, 69, 96,
 ]);
 
-const HIGHLIGHT_UNDERLINE = new Set([329, 923, 392, 293, 326, 623, 362, 263, 44, 55, 102, 201, 322, 223, 1488, 8841, 314, 413]);
+const HIGHLIGHT_UNDERLINE = new Set([329, 923, 392, 293, 326, 623, 362, 263, 44, 55, 102, 201, 322, 223, 1488, 8841, 314, 413, 111, 222, 333, 444, 555, 777, 888]);
 
 function getValueStyle(val: number): "box" | "underline" | null {
   if (HIGHLIGHT_BOX.has(val)) return "box";
