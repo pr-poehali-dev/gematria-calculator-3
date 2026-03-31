@@ -390,6 +390,7 @@ export default function Index() {
   const [enabledCiphers, setEnabledCiphers] = useState<Set<CipherId>>(loadEnabledCiphers);
   const [history, setHistory] = useState<HistoryItem[]>(loadHistory);
   const [showBreakdownFor, setShowBreakdownFor] = useState<CipherId | null>(null);
+  const [showCSKeyboard, setShowCSKeyboard] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const resultKey = useRef(0);
 
@@ -404,6 +405,19 @@ export default function Index() {
   }, [history]);
 
   useEffect(() => { if (tab === "calc") inputRef.current?.focus(); }, [tab]);
+
+  const insertCSChar = (char: string) => {
+    const input = inputRef.current;
+    if (!input) return;
+    const start = input.selectionStart ?? text.length;
+    const end = input.selectionEnd ?? text.length;
+    const newText = text.slice(0, start) + char + text.slice(end);
+    setText(newText);
+    requestAnimationFrame(() => {
+      input.focus();
+      input.setSelectionRange(start + char.length, start + char.length);
+    });
+  };
 
   const detectedLang = detectLang(text);
   const hasText = text.trim().length > 0;
@@ -652,10 +666,12 @@ export default function Index() {
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleCalculate(); } }}
+                onFocus={() => { if (detectedLang === "church_slavonic" || showCSKeyboard) setShowCSKeyboard(true); }}
                 placeholder="enter word or phrase..."
                 className="flex-1 bg-transparent outline-none text-foreground placeholder:text-foreground/40 text-sm"
                 spellCheck={false}
                 autoComplete="off"
+                readOnly={showCSKeyboard}
               />
               <div className="flex items-center gap-3 shrink-0">
                 {detectedLang && (
@@ -663,6 +679,13 @@ export default function Index() {
                     {{ english: "EN", russian: "RU", church_slavonic: "ЦСЯ", hebrew: "HE", greek: "GR", arabic: "AR" }[detectedLang]} · {activeCiphers.length}
                   </span>
                 )}
+                <button
+                  onClick={() => setShowCSKeyboard(v => !v)}
+                  title="Церковнославянская клавиатура"
+                  className={`text-[11px] px-1.5 py-0.5 border transition-colors tracking-wider ${showCSKeyboard ? "border-accent text-accent" : "border-border text-foreground/40 hover:text-foreground/70 hover:border-border/80"}`}
+                >
+                  ЦСЯ
+                </button>
                 {hasText && (
                   <button onClick={() => { setText(""); setCommitted(""); }} className="text-muted-foreground/40 hover:text-muted-foreground transition-colors">
                     <Icon name="X" size={13} />
@@ -677,6 +700,34 @@ export default function Index() {
                 </button>
               </div>
             </div>
+
+            {/* Church Slavonic virtual keyboard */}
+            {showCSKeyboard && (
+              <div className="border-b border-border px-3 py-2 flex flex-col gap-1.5" style={{ background: 'hsl(222 25% 6%)' }}>
+                {[
+                  ['а','в','г','д','є','е','ж','ѕ','з','и','і','ї'],
+                  ['й','к','л','м','н','о','п','р','с','т','у','ф'],
+                  ['х','ц','ч','ш','щ','ъ','ы','ь','ѣ','э','ю','я'],
+                  ['ѳ','ѵ','ѯ','ѱ','ѡ','ѿ',' ','⌫'],
+                ].map((row, ri) => (
+                  <div key={ri} className="flex gap-1 flex-wrap">
+                    {row.map((ch) => (
+                      <button
+                        key={ch}
+                        onMouseDown={(e) => { e.preventDefault(); if (ch === '⌫') { setText(t => t.slice(0, -1)); } else { insertCSChar(ch); } }}
+                        className={`flex items-center justify-center border border-border/60 text-foreground/80 hover:text-accent hover:border-accent/40 transition-colors select-none
+                          ${ch === ' ' ? 'flex-1 text-[10px] text-foreground/30 tracking-widest' : 'min-w-[32px] h-8 text-sm'}
+                          ${ch === '⌫' ? 'px-3 text-foreground/40 hover:text-red-400 hover:border-red-400/40 text-xs' : ''}
+                        `}
+                        style={{ background: 'hsl(222 25% 10%)' }}
+                      >
+                        {ch === ' ' ? 'SPACE' : ch}
+                      </button>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            )}
 
             {/* Results table */}
             <div className="flex-1 overflow-y-auto">
