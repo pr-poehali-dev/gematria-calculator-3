@@ -666,7 +666,7 @@ export default function Index() {
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleCalculate(); } }}
-                onFocus={() => { if (detectedLang === "church_slavonic" || showCSKeyboard) setShowCSKeyboard(true); }}
+                onFocus={() => setShowCSKeyboard(true)}
                 placeholder="enter word or phrase..."
                 className="flex-1 bg-transparent outline-none text-foreground placeholder:text-foreground/40 text-sm"
                 spellCheck={false}
