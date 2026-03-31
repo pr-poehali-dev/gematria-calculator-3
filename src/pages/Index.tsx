@@ -674,7 +674,7 @@ export default function Index() {
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleCalculate(); } }}
-                onFocus={() => {}}
+                onFocus={() => { if (detectedLang === "greek") setShowGRKeyboard(true); else setShowCSKeyboard(true); }}
                 onBlur={(e) => { if (!e.relatedTarget?.closest?.('[data-cskeyboard]') && !e.relatedTarget?.closest?.('[data-grkeyboard]')) { setShowCSKeyboard(false); setShowGRKeyboard(false); } }}
                 placeholder="enter word or phrase..."
                 className="flex-1 bg-transparent outline-none text-foreground placeholder:text-foreground/40 text-sm"
