@@ -674,7 +674,12 @@ export default function Index() {
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleCalculate(); } }}
-                onFocus={() => { if (detectedLang === "greek") setShowGRKeyboard(true); else setShowCSKeyboard(true); }}
+                onFocus={() => {
+                  const hasCS = CIPHERS.some(c => c.group === "church_slavonic" && enabledCiphers.has(c.id));
+                  const hasGR = CIPHERS.some(c => c.group === "greek" && enabledCiphers.has(c.id));
+                  if (detectedLang === "greek" || (!detectedLang && hasGR && !hasCS)) { setShowGRKeyboard(true); setShowCSKeyboard(false); }
+                  else if (hasCS) { setShowCSKeyboard(true); setShowGRKeyboard(false); }
+                }}
                 onBlur={(e) => { if (!e.relatedTarget?.closest?.('[data-cskeyboard]') && !e.relatedTarget?.closest?.('[data-grkeyboard]')) { setShowCSKeyboard(false); setShowGRKeyboard(false); } }}
                 placeholder="enter word or phrase..."
                 className="flex-1 bg-transparent outline-none text-foreground placeholder:text-foreground/40 text-sm"
@@ -688,20 +693,7 @@ export default function Index() {
                     {{ english: "EN", russian: "RU", church_slavonic: "ЦСЯ", hebrew: "HE", greek: "GR", arabic: "AR" }[detectedLang]} · {activeCiphers.length}
                   </span>
                 )}
-                <button
-                  onClick={() => setShowCSKeyboard(v => !v)}
-                  title="Церковнославянская клавиатура"
-                  className={`text-[11px] px-1.5 py-0.5 border transition-colors tracking-wider ${showCSKeyboard ? "border-accent text-accent" : "border-border text-foreground/40 hover:text-foreground/70 hover:border-border/80"}`}
-                >
-                  ЦСЯ
-                </button>
-                <button
-                  onClick={() => setShowGRKeyboard(v => !v)}
-                  title="Греческая клавиатура"
-                  className={`text-[11px] px-1.5 py-0.5 border transition-colors tracking-wider ${showGRKeyboard ? "border-accent text-accent" : "border-border text-foreground/40 hover:text-foreground/70 hover:border-border/80"}`}
-                >
-                  GR
-                </button>
+
                 {hasText && (
                   <button onClick={() => { setText(""); setCommitted(""); }} className="text-muted-foreground/40 hover:text-muted-foreground transition-colors">
                     <Icon name="X" size={13} />
