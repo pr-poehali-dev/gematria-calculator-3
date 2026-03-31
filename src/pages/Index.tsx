@@ -196,7 +196,7 @@ interface Cipher {
   label: string;
   sublabel: string;
   table: Record<string, number>;
-  group: "english" | "russian" | "church_slavonic" | "hebrew" | "greek" | "arabic";
+  group: "english" | "english_extended" | "russian" | "church_slavonic" | "hebrew" | "greek" | "arabic";
 }
 
 const CIPHERS: Cipher[] = [
@@ -206,14 +206,14 @@ const CIPHERS: Cipher[] = [
   { id: "en_reverse_reduction",  label: "English R Reduction", sublabel: "Z–A цикл 1–9",          table: EN_REVERSE_REDUCTION,  group: "english" },
   { id: "en_sumerian",           label: "English Sumerian",    sublabel: "A=6 … Z=156",           table: EN_SUMERIAN,           group: "english" },
   { id: "en_reverse_sumerian",   label: "English R Sumerian",  sublabel: "Z=6 … A=156",           table: EN_REVERSE_SUMERIAN,   group: "english" },
-  { id: "en_extended",           label: "English Extended",    sublabel: "A=1 … Z=26",            table: EN_EXTENDED,           group: "english" },
-  { id: "en_reverse_extended",   label: "English R Extended",  sublabel: "Z=1 … A=26",            table: EN_REVERSE_EXTENDED,   group: "english" },
+  { id: "en_extended",           label: "English Extended",    sublabel: "A=1 … Z=26",            table: EN_EXTENDED,           group: "english_extended" },
+  { id: "en_reverse_extended",   label: "English R Extended",  sublabel: "Z=1 … A=26",            table: EN_REVERSE_EXTENDED,   group: "english_extended" },
   { id: "en_agrippa_key",        label: "Agrippa Key",         sublabel: "a=1 … z=500",           table: EN_AGRIPPA_KEY,        group: "english" },
-  { id: "en_agrippa_ordinal",    label: "Agrippa Ordinal",     sublabel: "ранг по Агриппе 1–23",  table: EN_AGRIPPA_ORDINAL,    group: "english" },
-  { id: "en_agrippa_reduction",  label: "Agrippa Reduction",   sublabel: "Агриппа → цифр. корень",table: EN_AGRIPPA_REDUCTION,  group: "english" },
-  { id: "en_qaballa",            label: "English Qaballa",     sublabel: "EQ: a=21 … b=26",       table: EN_QABALLA,            group: "english" },
-  { id: "en_illuminati_novice",  label: "Illuminati Novice",   sublabel: "A=1, B=3, C=6…",        table: EN_ILLUMINATI_NOVICE,  group: "english" },
-  { id: "en_illuminati_reverse", label: "Illuminati Reverse",  sublabel: "Z=1, Y=3, X=6…",        table: EN_ILLUMINATI_REVERSE, group: "english" },
+  { id: "en_agrippa_ordinal",    label: "Agrippa Ordinal",     sublabel: "ранг по Агриппе 1–23",  table: EN_AGRIPPA_ORDINAL,    group: "english_extended" },
+  { id: "en_agrippa_reduction",  label: "Agrippa Reduction",   sublabel: "Агриппа → цифр. корень",table: EN_AGRIPPA_REDUCTION,  group: "english_extended" },
+  { id: "en_qaballa",            label: "English Qaballa",     sublabel: "EQ: a=21 … b=26",       table: EN_QABALLA,            group: "english_extended" },
+  { id: "en_illuminati_novice",  label: "Illuminati Novice",   sublabel: "A=1, B=3, C=6…",        table: EN_ILLUMINATI_NOVICE,  group: "english_extended" },
+  { id: "en_illuminati_reverse", label: "Illuminati Reverse",  sublabel: "Z=1, Y=3, X=6…",        table: EN_ILLUMINATI_REVERSE, group: "english_extended" },
   { id: "ru_ordinal",            label: "Russian Ordinal",     sublabel: "А=1 … Я=33",            table: RU_ORDINAL,            group: "russian" },
   { id: "ru_reverse_ordinal",    label: "Russian R Ordinal",   sublabel: "Я=1 … А=33",            table: RU_REVERSE_ORDINAL,    group: "russian" },
   { id: "ru_reduction",          label: "Russian Reduction",   sublabel: "А–Я цикл 1–9",          table: RU_REDUCTION,          group: "russian" },
@@ -413,7 +413,7 @@ export default function Index() {
     if (!enabledCiphers.has(c.id)) return false;
     if (detectedLang === "russian") return c.group === "russian";
     if (detectedLang === "church_slavonic") return c.group === "church_slavonic";
-    if (detectedLang === "english") return c.group === "english";
+    if (detectedLang === "english") return c.group === "english" || c.group === "english_extended";
     if (detectedLang === "hebrew") return c.group === "hebrew";
     if (detectedLang === "greek") return c.group === "greek";
     if (detectedLang === "arabic") return c.group === "arabic";
@@ -454,7 +454,7 @@ export default function Index() {
     });
   }
 
-  function toggleGroup(group: "english" | "russian" | "church_slavonic" | "hebrew" | "greek" | "arabic", enable: boolean) {
+  function toggleGroup(group: "english" | "english_extended" | "russian" | "church_slavonic" | "hebrew" | "greek" | "arabic", enable: boolean) {
     setEnabledCiphers((prev) => {
       const next = new Set(prev);
       if (enable) {
@@ -930,11 +930,11 @@ export default function Index() {
             Язык определяется автоматически · выбранные шифры сохраняются
           </div>
 
-          {(["english", "russian", "church_slavonic", "hebrew", "greek", "arabic"] as const).map((group) => {
+          {(["english", "english_extended", "russian", "church_slavonic", "hebrew", "greek", "arabic"] as const).map((group) => {
             const groupCiphers = CIPHERS.filter((c) => c.group === group);
             const allEnabled = groupCiphers.every((c) => enabledCiphers.has(c.id));
             const isCollapsed = expandedGroup !== group;
-            const groupLabel = { english: "ENGLISH", russian: "RUSSIAN", church_slavonic: "ЦЕРК.-СЛАВ.", hebrew: "HEBREW", greek: "GREEK", arabic: "ARABIC" }[group];
+            const groupLabel = { english: "ENGLISH", english_extended: "ENGLISH EXTENDED", russian: "RUSSIAN", church_slavonic: "ЦЕРК.-СЛАВ.", hebrew: "HEBREW", greek: "GREEK", arabic: "ARABIC" }[group];
 
             return (
               <div key={group}>
