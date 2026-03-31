@@ -407,11 +407,6 @@ export default function Index() {
 
   useEffect(() => { if (tab === "calc") inputRef.current?.focus(); }, [tab]);
 
-  useEffect(() => {
-    if (detectedLang === "church_slavonic") { setShowCSKeyboard(true); setShowGRKeyboard(false); }
-    else if (detectedLang === "greek") { setShowGRKeyboard(true); setShowCSKeyboard(false); }
-  }, [detectedLang]);
-
   const insertCSChar = (char: string) => {
     const input = inputRef.current;
     if (!input) return;
@@ -427,6 +422,11 @@ export default function Index() {
 
   const detectedLang = detectLang(text);
   const hasText = text.trim().length > 0;
+
+  useEffect(() => {
+    if (detectedLang === "church_slavonic") { setShowCSKeyboard(true); setShowGRKeyboard(false); }
+    else if (detectedLang === "greek") { setShowGRKeyboard(true); setShowCSKeyboard(false); }
+  }, [detectedLang]);
 
   // Ciphers to use for calculation — filtered by detected language
   const activeCiphers = CIPHERS.filter((c) => {
