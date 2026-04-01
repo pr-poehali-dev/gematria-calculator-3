@@ -468,6 +468,8 @@ export default function Index() {
   }
 
   function toggleCipher(id: CipherId) {
+    setText("");
+    setCommitted("");
     setEnabledCiphers((prev) => {
       const next = new Set(prev);
       if (next.has(id)) {
@@ -484,6 +486,8 @@ export default function Index() {
   }
 
   function toggleGroup(group: "english" | "english_extended" | "russian" | "church_slavonic" | "hebrew" | "greek" | "arabic", enable: boolean) {
+    setText("");
+    setCommitted("");
     setEnabledCiphers((prev) => {
       const next = new Set(prev);
       if (enable) {
