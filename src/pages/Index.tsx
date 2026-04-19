@@ -1012,9 +1012,9 @@ export default function Index() {
                             setText(item.text); setCommitted(item.text); resultKey.current += 1;
                           }}
                         >
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-foreground/90 text-[13px] truncate flex-1">
-                              {item.text.length > 26 ? item.text.slice(0, 26) + "…" : item.text}
+                          <div className="flex items-start justify-between mb-2">
+                            <span className="text-foreground/90 text-[13px] flex-1 break-words min-w-0">
+                              {item.text}
                             </span>
                             <span className="text-foreground/50 text-[10px] shrink-0 ml-2">{item.date}</span>
                           </div>
