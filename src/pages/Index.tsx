@@ -431,6 +431,7 @@ export default function Index() {
     else if (detectedLang === "greek") { setShowGRKeyboard(true); setShowCSKeyboard(false); setShowHEKeyboard(false); setShowARKeyboard(false); }
     else if (detectedLang === "hebrew") { setShowHEKeyboard(true); setShowCSKeyboard(false); setShowGRKeyboard(false); setShowARKeyboard(false); }
     else if (detectedLang === "arabic") { setShowARKeyboard(true); setShowCSKeyboard(false); setShowGRKeyboard(false); setShowHEKeyboard(false); }
+    // не сбрасываем клавиатуру если пользователь открыл её вручную
   }, [detectedLang]);
 
   // Ciphers to use for calculation — filtered by detected language
@@ -715,6 +716,7 @@ export default function Index() {
                   </button>
                 )}
                 <button
+                  onMouseDown={e => e.preventDefault()}
                   onClick={handleCalculate}
                   disabled={!hasText || activeCiphers.length === 0}
                   className="px-3 py-1 text-xs border border-border text-foreground/80 hover:text-accent hover:border-accent/50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors tracking-widest uppercase"
