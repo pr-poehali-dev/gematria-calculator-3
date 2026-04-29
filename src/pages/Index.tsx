@@ -468,6 +468,10 @@ export default function Index() {
     setText("");
     setCommitted("");
     userKeyboard.current = null;
+    setShowCSKeyboard(false);
+    setShowGRKeyboard(false);
+    setShowHEKeyboard(false);
+    setShowARKeyboard(false);
     setEnabledCiphers((prev) => {
       const next = new Set(prev);
       if (next.has(id)) {
