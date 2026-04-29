@@ -396,6 +396,7 @@ export default function Index() {
   const [showARKeyboard, setShowARKeyboard] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const resultKey = useRef(0);
+  const userKeyboard = useRef<"cs" | "gr" | "he" | "ar" | null>(null);
 
   // Persist ciphers
   useEffect(() => {
@@ -427,11 +428,10 @@ export default function Index() {
   const hasText = text.trim().length > 0;
 
   useEffect(() => {
-    if (detectedLang === "church_slavonic") { setShowCSKeyboard(true); setShowGRKeyboard(false); setShowHEKeyboard(false); setShowARKeyboard(false); }
-    else if (detectedLang === "greek") { setShowGRKeyboard(true); setShowCSKeyboard(false); setShowHEKeyboard(false); setShowARKeyboard(false); }
-    else if (detectedLang === "hebrew") { setShowHEKeyboard(true); setShowCSKeyboard(false); setShowGRKeyboard(false); setShowARKeyboard(false); }
-    else if (detectedLang === "arabic") { setShowARKeyboard(true); setShowCSKeyboard(false); setShowGRKeyboard(false); setShowHEKeyboard(false); }
-    // не сбрасываем клавиатуру если пользователь открыл её вручную
+    if (detectedLang === "church_slavonic") { setShowCSKeyboard(true); setShowGRKeyboard(false); setShowHEKeyboard(false); setShowARKeyboard(false); userKeyboard.current = "cs"; }
+    else if (detectedLang === "greek") { setShowGRKeyboard(true); setShowCSKeyboard(false); setShowHEKeyboard(false); setShowARKeyboard(false); userKeyboard.current = "gr"; }
+    else if (detectedLang === "hebrew") { setShowHEKeyboard(true); setShowCSKeyboard(false); setShowGRKeyboard(false); setShowARKeyboard(false); userKeyboard.current = "he"; }
+    else if (detectedLang === "arabic") { setShowARKeyboard(true); setShowCSKeyboard(false); setShowGRKeyboard(false); setShowHEKeyboard(false); userKeyboard.current = "ar"; }
   }, [detectedLang]);
 
   // Ciphers to use for calculation — filtered by detected language
@@ -471,6 +471,7 @@ export default function Index() {
   function toggleCipher(id: CipherId) {
     setText("");
     setCommitted("");
+    userKeyboard.current = null;
     setEnabledCiphers((prev) => {
       const next = new Set(prev);
       if (next.has(id)) {
@@ -687,14 +688,18 @@ export default function Index() {
                 onChange={(e) => setText(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleCalculate(); } }}
                 onFocus={() => {
+                  if (userKeyboard.current === "cs") { setShowCSKeyboard(true); return; }
+                  if (userKeyboard.current === "gr") { setShowGRKeyboard(true); return; }
+                  if (userKeyboard.current === "he") { setShowHEKeyboard(true); return; }
+                  if (userKeyboard.current === "ar") { setShowARKeyboard(true); return; }
                   const hasCS = CIPHERS.some(c => c.group === "church_slavonic" && enabledCiphers.has(c.id));
                   const hasGR = CIPHERS.some(c => c.group === "greek" && enabledCiphers.has(c.id));
                   const hasHE = CIPHERS.some(c => c.group === "hebrew" && enabledCiphers.has(c.id));
                   const hasAR = CIPHERS.some(c => c.group === "arabic" && enabledCiphers.has(c.id));
-                  if (detectedLang === "greek" || (!detectedLang && hasGR && !hasCS && !hasHE && !hasAR)) { setShowGRKeyboard(true); }
-                  else if (detectedLang === "hebrew" || (!detectedLang && hasHE && !hasCS && !hasGR && !hasAR)) { setShowHEKeyboard(true); }
-                  else if (detectedLang === "arabic" || (!detectedLang && hasAR && !hasCS && !hasGR && !hasHE)) { setShowARKeyboard(true); }
-                  else if (hasCS) { setShowCSKeyboard(true); }
+                  if (detectedLang === "greek" || (!detectedLang && hasGR && !hasCS && !hasHE && !hasAR)) { setShowGRKeyboard(true); userKeyboard.current = "gr"; }
+                  else if (detectedLang === "hebrew" || (!detectedLang && hasHE && !hasCS && !hasGR && !hasAR)) { setShowHEKeyboard(true); userKeyboard.current = "he"; }
+                  else if (detectedLang === "arabic" || (!detectedLang && hasAR && !hasCS && !hasGR && !hasHE)) { setShowARKeyboard(true); userKeyboard.current = "ar"; }
+                  else if (hasCS) { setShowCSKeyboard(true); userKeyboard.current = "cs"; }
                 }}
                 onBlur={(e) => { if (!e.relatedTarget?.closest?.('[data-cskeyboard]') && !e.relatedTarget?.closest?.('[data-grkeyboard]') && !e.relatedTarget?.closest?.('[data-hekeyboard]') && !e.relatedTarget?.closest?.('[data-arkeyboard]')) { setShowCSKeyboard(false); setShowGRKeyboard(false); setShowHEKeyboard(false); setShowARKeyboard(false); } }}
                 placeholder="enter word or phrase..."
