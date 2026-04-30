@@ -253,6 +253,14 @@ interface HistoryItem {
 // - Greek: NFD-decompose then remove combining marks (U+0300–U+036F, U+1DC0–U+1DFF)
 // - Hebrew niqqud (U+05B0–U+05C7)
 // - Arabic harakat (U+064B–U+065F), tatweel (U+0640)
+const LATIN_TO_CYRILLIC: Record<string, string> = {
+  'A':'А','a':'а','B':'В','E':'Е','e':'е','K':'К','k':'к','M':'М','H':'Н','O':'О','o':'о',
+  'P':'Р','p':'р','C':'С','c':'с','T':'Т','X':'Х','x':'х','y':'у','Y':'У',
+};
+function replaceLatinHomoglyphs(str: string): string {
+  return str.split('').map(ch => LATIN_TO_CYRILLIC[ch] ?? ch).join('');
+}
+
 function stripDiacritics(char: string): string {
   // First normalize to NFC to preserve composite letters like й, ё, ї etc.
   // then decompose only for diacritic stripping of non-Cyrillic scripts
@@ -690,7 +698,7 @@ export default function Index() {
               <input
                 ref={inputRef}
                 value={text}
-                onChange={(e) => setText(e.target.value)}
+                onChange={(e) => setText(replaceLatinHomoglyphs(e.target.value))}
                 onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleCalculate(); } }}
                 onFocus={() => {
                   if (userKeyboard.current === "cs") { setShowCSKeyboard(true); return; }
