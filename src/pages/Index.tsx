@@ -254,7 +254,12 @@ interface HistoryItem {
 // - Hebrew niqqud (U+05B0–U+05C7)
 // - Arabic harakat (U+064B–U+065F), tatweel (U+0640)
 function stripDiacritics(char: string): string {
-  return char
+  // First normalize to NFC to preserve composite letters like й, ё, ї etc.
+  // then decompose only for diacritic stripping of non-Cyrillic scripts
+  const nfc = char.normalize("NFC");
+  // If it's a Cyrillic character, return as-is (don't strip й → и, ё → е)
+  if (/[\u0400-\u04FF]/.test(nfc)) return nfc;
+  return nfc
     .normalize("NFD")
     .replace(/[\u0300-\u036F\u1DC0-\u1DFF\u05B0-\u05C7\u064B-\u065F\u0640]/g, "");
 }
