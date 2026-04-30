@@ -304,7 +304,9 @@ function parseChars(text: string, table: Record<string, number>): CharInfo[] {
 }
 
 function sumText(text: string, table: Record<string, number>): number {
-  return parseChars(text, table).reduce((acc, c) => acc + c.value, 0);
+  const chars = parseChars(text, table);
+  console.log('sumText chars:', chars.map(c => `${c.char}(U+${c.char.charCodeAt(0).toString(16).toUpperCase()})=${c.value}`).join(', '));
+  return chars.reduce((acc, c) => acc + c.value, 0);
 }
 
 function digitalRoot(n: number): number {
