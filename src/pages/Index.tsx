@@ -272,6 +272,10 @@ function stripDiacritics(char: string): string {
     .replace(/[\u0300-\u036F\u1DC0-\u1DFF\u05B0-\u05C7\u064B-\u065F\u0640]/g, "");
 }
 
+function isCyrillicTable(table: Record<string, number>): boolean {
+  return Object.keys(table).some(k => /[\u0400-\u04FF]/.test(k));
+}
+
 function getCharValue(char: string, table: Record<string, number>): number {
   const fromTable = table[char.toLowerCase()];
   if (fromTable !== undefined) return fromTable;
@@ -280,9 +284,10 @@ function getCharValue(char: string, table: Record<string, number>): number {
 
 function parseChars(text: string, table: Record<string, number>): CharInfo[] {
   const result: CharInfo[] = [];
+  const cyrillic = isCyrillicTable(table);
   let i = 0;
   while (i < text.length) {
-    const raw = text[i];
+    const raw = cyrillic ? replaceLatinHomoglyphs(text[i]) : text[i];
     const stripped = stripDiacritics(raw);
     if (stripped === "") { i++; continue; }
     // Collect consecutive digit characters into one number token
@@ -698,7 +703,7 @@ export default function Index() {
               <input
                 ref={inputRef}
                 value={text}
-                onChange={(e) => setText(replaceLatinHomoglyphs(e.target.value))}
+                onChange={(e) => setText(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleCalculate(); } }}
                 onFocus={() => {
                   if (userKeyboard.current === "cs") { setShowCSKeyboard(true); return; }
