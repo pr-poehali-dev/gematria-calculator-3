@@ -49,6 +49,15 @@ const EN_QABALLA: Record<string, number> = {
   a:21,b:26,c:22,d:5, e:7, f:10,g:9, h:6, i:3, j:15,k:17,l:1, m:19,
   n:13,o:25,p:23,q:11,r:2, s:20,t:24,u:8, v:16,w:18,x:4, y:12,z:14,
 };
+const EN_STANDARD: Record<string, number> = {
+  a:1,b:2,c:3,d:4,e:5,f:6,g:7,h:8,i:9,j:10,k:20,l:30,m:40,
+  n:50,o:60,p:70,q:80,r:90,s:100,t:200,u:300,v:400,w:500,x:600,y:700,z:800,
+};
+const EN_STANDARD_VALUES = Object.values(EN_STANDARD);
+const EN_REVERSE_STANDARD: Record<string, number> = Object.fromEntries(
+  Object.keys(EN_STANDARD).map((k, i) => [k, EN_STANDARD_VALUES[EN_STANDARD_VALUES.length - 1 - i]])
+);
+
 const EN_ILLUMINATI_NOVICE: Record<string, number> = Object.fromEntries(
   Object.entries(EN_ORDINAL).map(([k, v]) => [k, (v * (v + 1)) / 2])
 );
@@ -181,6 +190,7 @@ type CipherId =
   | "en_ordinal" | "en_reduction"
   | "en_reverse_ordinal" | "en_reverse_reduction"
   | "en_sumerian" | "en_reverse_sumerian"
+  | "en_standard" | "en_reverse_standard"
   | "en_extended" | "en_reverse_extended"
   | "en_agrippa_key" | "en_agrippa_ordinal" | "en_agrippa_reduction"
   | "en_qaballa" | "en_illuminati_novice" | "en_illuminati_reverse"
@@ -206,6 +216,8 @@ const CIPHERS: Cipher[] = [
   { id: "en_reverse_reduction",  label: "English R Reduction", sublabel: "Z–A цикл 1–9",          table: EN_REVERSE_REDUCTION,  group: "english" },
   { id: "en_sumerian",           label: "English Sumerian",    sublabel: "A=6 … Z=156",           table: EN_SUMERIAN,           group: "english" },
   { id: "en_reverse_sumerian",   label: "English R Sumerian",  sublabel: "Z=6 … A=156",           table: EN_REVERSE_SUMERIAN,   group: "english" },
+  { id: "en_standard",           label: "Standard",            sublabel: "A=1 … Z=800",           table: EN_STANDARD,           group: "english" },
+  { id: "en_reverse_standard",   label: "Reverse Standard",    sublabel: "Z=1 … A=800",           table: EN_REVERSE_STANDARD,   group: "english" },
   { id: "en_extended",           label: "English Extended",    sublabel: "A=1 … Z=26",            table: EN_EXTENDED,           group: "english_extended" },
   { id: "en_reverse_extended",   label: "English R Extended",  sublabel: "Z=1 … A=26",            table: EN_REVERSE_EXTENDED,   group: "english_extended" },
   { id: "en_agrippa_key",        label: "Agrippa Key",         sublabel: "a=1 … z=500",           table: EN_AGRIPPA_KEY,        group: "english" },
