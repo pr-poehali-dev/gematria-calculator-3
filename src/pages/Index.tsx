@@ -70,6 +70,16 @@ const RU_ORDINAL: Record<string, number> = {
   н:15,о:16,п:17,р:18,с:19,т:20,у:21,ф:22,х:23,ц:24,ч:25,ш:26,щ:27,
   ъ:28,ы:29,ь:30,э:31,ю:32,я:33,
 };
+const RU_STANDARD: Record<string, number> = {
+  а:1,б:2,в:3,г:4,д:5,е:6,ё:7,ж:8,з:9,
+  и:10,й:20,к:30,л:40,м:50,н:60,о:70,п:80,р:90,
+  с:100,т:200,у:300,ф:400,х:500,ц:600,ч:700,ш:800,щ:900,ъ:1000,ы:2000,ь:3000,э:4000,ю:5000,я:6000,
+};
+const RU_STANDARD_VALUES = Object.values(RU_STANDARD);
+const RU_REVERSE_STANDARD: Record<string, number> = Object.fromEntries(
+  Object.keys(RU_STANDARD).map((k, i) => [k, RU_STANDARD_VALUES[RU_STANDARD_VALUES.length - 1 - i]])
+);
+
 const RU_REDUCTION: Record<string, number> = Object.fromEntries(
   Object.entries(RU_ORDINAL).map(([k, v]) => [k, ((v - 1) % 9) + 1])
 );
@@ -196,6 +206,7 @@ type CipherId =
   | "en_qaballa" | "en_illuminati_novice" | "en_illuminati_reverse"
   | "ru_ordinal" | "ru_reduction" | "ru_reverse_ordinal" | "ru_reverse_reduction"
   | "ru_sumerian" | "ru_reverse_sumerian"
+  | "ru_standard" | "ru_reverse_standard"
   | "cs_gematria"
   | "he_ordinal" | "he_reduction" | "he_gematria" | "he_soffits"
   | "gr_isopsephy" | "gr_ordinal" | "gr_reduction"
@@ -232,6 +243,8 @@ const CIPHERS: Cipher[] = [
   { id: "ru_reverse_reduction",  label: "Russian R Reduction", sublabel: "Я–А цикл 1–9",          table: RU_REVERSE_REDUCTION,  group: "russian" },
   { id: "ru_sumerian",           label: "Russian Sumerian",    sublabel: "А=6 … Я=198",           table: RU_SUMERIAN,           group: "russian" },
   { id: "ru_reverse_sumerian",   label: "Russian R Sumerian",  sublabel: "Я=6 … А=198",           table: RU_REVERSE_SUMERIAN,   group: "russian" },
+  { id: "ru_standard",           label: "Standard",            sublabel: "А=1 … Я=6000",          table: RU_STANDARD,           group: "russian" },
+  { id: "ru_reverse_standard",   label: "Reverse Standard",    sublabel: "Я=1 … А=6000",          table: RU_REVERSE_STANDARD,   group: "russian" },
   // Church Slavonic
   { id: "cs_gematria",           label: "ЦС Гематрия",         sublabel: "а=1 … ѿ=900",           table: CS_GEMATRIA,           group: "church_slavonic" },
 
