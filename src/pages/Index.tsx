@@ -739,10 +739,10 @@ export default function Index() {
                   const hasGR = CIPHERS.some(c => c.group === "greek" && enabledCiphers.has(c.id));
                   const hasHE = CIPHERS.some(c => c.group === "hebrew" && enabledCiphers.has(c.id));
                   const hasAR = CIPHERS.some(c => c.group === "arabic" && enabledCiphers.has(c.id));
-                  if (detectedLang === "greek" || (!detectedLang && hasGR && !hasCS && !hasHE && !hasAR)) { setShowGRKeyboard(true); userKeyboard.current = "gr"; }
-                  else if (detectedLang === "hebrew" || (!detectedLang && hasHE && !hasCS && !hasGR && !hasAR)) { setShowHEKeyboard(true); userKeyboard.current = "he"; }
-                  else if (detectedLang === "arabic" || (!detectedLang && hasAR && !hasCS && !hasGR && !hasHE)) { setShowARKeyboard(true); userKeyboard.current = "ar"; }
-                  else if (hasCS) { setShowCSKeyboard(true); userKeyboard.current = "cs"; }
+                  if (hasCS) { setShowCSKeyboard(true); userKeyboard.current = "cs"; }
+                  else if (hasGR) { setShowGRKeyboard(true); userKeyboard.current = "gr"; }
+                  else if (hasHE) { setShowHEKeyboard(true); userKeyboard.current = "he"; }
+                  else if (hasAR) { setShowARKeyboard(true); userKeyboard.current = "ar"; }
                 }}
                 onBlur={(e) => { if (!e.relatedTarget?.closest?.('[data-cskeyboard]') && !e.relatedTarget?.closest?.('[data-grkeyboard]') && !e.relatedTarget?.closest?.('[data-hekeyboard]') && !e.relatedTarget?.closest?.('[data-arkeyboard]')) { setShowCSKeyboard(false); setShowGRKeyboard(false); setShowHEKeyboard(false); setShowARKeyboard(false); } }}
                 placeholder="enter word or phrase..."
