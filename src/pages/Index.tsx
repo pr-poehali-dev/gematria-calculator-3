@@ -477,6 +477,21 @@ export default function Index() {
     else if (detectedLang === "arabic") { setShowARKeyboard(true); setShowCSKeyboard(false); setShowGRKeyboard(false); setShowHEKeyboard(false); userKeyboard.current = "ar"; }
   }, [detectedLang]);
 
+  useEffect(() => {
+    const hasCS = CIPHERS.some(c => c.group === "church_slavonic" && enabledCiphers.has(c.id));
+    const hasGR = CIPHERS.some(c => c.group === "greek" && enabledCiphers.has(c.id));
+    const hasHE = CIPHERS.some(c => c.group === "hebrew" && enabledCiphers.has(c.id));
+    const hasAR = CIPHERS.some(c => c.group === "arabic" && enabledCiphers.has(c.id));
+    const anySpecial = hasCS || hasGR || hasHE || hasAR;
+    if (!anySpecial) {
+      setShowCSKeyboard(false); setShowGRKeyboard(false); setShowHEKeyboard(false); setShowARKeyboard(false);
+      userKeyboard.current = null;
+    } else if (hasCS) { setShowCSKeyboard(true); setShowGRKeyboard(false); setShowHEKeyboard(false); setShowARKeyboard(false); userKeyboard.current = "cs"; }
+    else if (hasGR) { setShowGRKeyboard(true); setShowCSKeyboard(false); setShowHEKeyboard(false); setShowARKeyboard(false); userKeyboard.current = "gr"; }
+    else if (hasHE) { setShowHEKeyboard(true); setShowCSKeyboard(false); setShowGRKeyboard(false); setShowARKeyboard(false); userKeyboard.current = "he"; }
+    else if (hasAR) { setShowARKeyboard(true); setShowCSKeyboard(false); setShowGRKeyboard(false); setShowHEKeyboard(false); userKeyboard.current = "ar"; }
+  }, [enabledCiphers]);
+
   // Ciphers to use for calculation — filtered by detected language
   const activeCiphers = CIPHERS.filter((c) => {
     if (!enabledCiphers.has(c.id)) return false;
