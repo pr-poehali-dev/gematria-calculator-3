@@ -451,7 +451,7 @@ export default function Index() {
     localStorage.setItem(LS_HISTORY, JSON.stringify(history));
   }, [history]);
 
-  useEffect(() => { if (tab === "calc") inputRef.current?.focus(); }, [tab]);
+  
 
   const insertCSChar = (char: string) => {
     const input = inputRef.current;
